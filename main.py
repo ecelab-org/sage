@@ -21,6 +21,10 @@ from typing import (
 )
 
 import anthropic
+from anthropic.types import (
+    MessageParam,
+    ToolParam,
+)
 from dotenv import load_dotenv
 
 # Load environment variables from .env file (containing API keys)
@@ -137,20 +141,20 @@ class Agent:
     def __init__(
         self,
         client: anthropic.Anthropic,
-        get_user_message: Callable[[], Tuple[str, bool]],
-        tool_registry: ToolRegistry,
+        input_handler: Callable[[], Tuple[str, bool]],
+        registry: ToolRegistry,
     ):
         """
         Initialize the agent with required components.
 
         Args:
             client: Anthropic API client
-            get_user_message: Function to get user input
-            tool_registry: Registry containing available tools
+            input_handler: Function to get user input
+            registry: Registry containing available tools
         """
         self.client = client
-        self.get_user_message = get_user_message
-        self.tool_registry = tool_registry
+        self.input_handler = input_handler
+        self.tool_registry = registry
 
     def run(self):
         """
@@ -168,7 +172,7 @@ class Agent:
             # Get user input if needed
             if read_user_input:
                 print("\033[94mYou\033[0m: ", end="")
-                user_input, ok = self.get_user_message()
+                user_input, ok = self.input_handler()
                 if not ok:
                     break  # Exit if user input couldn't be retrieved (e.g., Ctrl+C)
 
@@ -256,12 +260,6 @@ class Agent:
         Returns:
             The AI's response message
         """
-        # Import necessary types for the Anthropic API
-        from anthropic.types import (
-            MessageParam,
-            ToolParam,
-        )
-
         # Format messages for the API
         messages: List[MessageParam] = [
             {"role": msg["role"], "content": msg["content"]} for msg in conversation
@@ -290,7 +288,7 @@ class Agent:
                 tools=anthropic_tools,
             )
             return response.model_dump()
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             # Handle API errors
             print(f"Error during inference: {str(e)}")
             return {
@@ -328,7 +326,7 @@ def read_file(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
         with open(path, "r", encoding="utf-8") as file:
             content = file.read()
         return content, None
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         return "", e
 
 
@@ -375,7 +373,7 @@ def list_files(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
                         files.append(rel_path)
 
         return json.dumps(files), None
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         return "", e
 
 
@@ -436,7 +434,7 @@ def edit_file(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
             file.write(new_content)
 
         return "OK", None
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         return "", e
 
 
@@ -462,7 +460,7 @@ def create_new_file(file_path: str, content: str) -> Tuple[str, Optional[Excepti
             file.write(content)
 
         return f"Successfully created file {file_path}", None
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         return "", Exception(f"Failed to create file: {str(e)}")
 
 
@@ -496,8 +494,14 @@ def main():
     try:
         # Start the agent's conversation loop
         agent.run()
-    except Exception as e:
-        print(f"Error: {str(e)}")
+    except (anthropic.APIError, anthropic.APIConnectionError) as e:
+        print(f"Anthropic API Error: {str(e)}")
+    except (IOError, OSError) as e:
+        print(f"Input/Output Error: {str(e)}")
+    except KeyboardInterrupt:
+        print("\nExiting due to user interrupt")
+    except Exception as e:  # pylint: disable=broad-except
+        print(f"Unexpected error: {str(e)}")
 
 
 if __name__ == "__main__":

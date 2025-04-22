@@ -113,15 +113,23 @@ def register_tool(name: str, description: str, input_schema: Dict[str, Any]):
     Args:
         name: The name of the tool
         description: A human-readable description of what the tool does
-        input_schema: JSON schema defining the expected inputs
+        input_schema: JSON schema defining the expected inputs and required fields.
+                     Should include a "properties" dict and a "required" list.
 
     Returns:
         A decorator function that registers the decorated function as a tool
     """
 
     def decorator(func):
+        # Extract properties and required fields from the schema
+        properties = input_schema.get("properties", {})
+        required = input_schema.get("required", [])
+
         tool_def = ToolDefinition(
-            name=name, description=description, input_schema=input_schema, function=func
+            name=name,
+            description=description,
+            input_schema={"properties": properties, "required": required},
+            function=func,
         )
         tool_registry.register(tool_def)
         return func
@@ -243,7 +251,12 @@ class Agent:
         # Execute the tool function
         response, err = tool_def.function(input_data)
         if err:
-            return {"type": "tool_result", "tool_use_id": id_str, "content": str(err)}
+            error_msg = str(err)
+            return {
+                "type": "tool_result",
+                "tool_use_id": id_str,
+                "content": f"[ERROR]: {error_msg}",
+            }
 
         return {"type": "tool_result", "tool_use_id": id_str, "content": response}
 
@@ -272,7 +285,11 @@ class Agent:
                 ToolParam(
                     name=tool.name,
                     description=tool.description,
-                    input_schema={"type": "object", "properties": tool.input_schema},
+                    input_schema={
+                        "type": "object",
+                        "properties": tool.input_schema.get("properties", {}),
+                        "required": tool.input_schema.get("required", []),
+                    },
                 )
             )
 
@@ -304,10 +321,13 @@ class Agent:
     name="read_file",
     description="Read the contents of a given relative file path. Use this when you want to see what's inside a file. Do not use this with directory names.",
     input_schema={
-        "path": {
-            "type": "string",
-            "description": "The relative path of a file in the working directory.",
-        }
+        "properties": {
+            "path": {
+                "type": "string",
+                "description": "The relative path of a file in the working directory.",
+            }
+        },
+        "required": ["path"],
     },
 )
 def read_file(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
@@ -334,10 +354,13 @@ def read_file(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
     name="list_files",
     description="List files and directories at a given path. If no path is provided, lists files in the current directory.",
     input_schema={
-        "path": {
-            "type": "string",
-            "description": "Optional relative path to list files from. Defaults to current directory if not provided.",
-        }
+        "properties": {
+            "path": {
+                "type": "string",
+                "description": "Optional relative path to list files from. Defaults to current directory if not provided.",
+            }
+        },
+        "required": [],
     },
 )
 def list_files(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
@@ -379,17 +402,35 @@ def list_files(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
 
 @register_tool(
     name="edit_file",
-    description="""Make edits to a text file.
-    Replaces 'old_str' with 'new_str' in the given file. 'old_str' and 'new_str' MUST be different from each other.
-    If the file specified with path doesn't exist, it will be created.
+    description="""Make edits to a text file or create a new file.
+
+    IMPORTANT: This tool ALWAYS requires three parameters: path, old_str, and new_str.
+
+    For existing files:
+    - Replaces 'old_str' with 'new_str' in the given file
+    - 'old_str' must exist in the file and must be different from 'new_str'
+
+    For creating new files:
+    - Set 'path' to the desired file location
+    - Set 'old_str' to an empty string: ""
+    - Set 'new_str' to the content you want in the file
+
+    Example to create a file:
+    edit_file({"path": "example.txt", "old_str": "", "new_str": "File content here"})
     """,
     input_schema={
-        "path": {"type": "string", "description": "The path to the file"},
-        "old_str": {
-            "type": "string",
-            "description": "Text to search for - must match exactly and must only have one match exactly",
+        "properties": {
+            "path": {"type": "string", "description": "The path to the file"},
+            "old_str": {
+                "type": "string",
+                "description": "Text to search for in existing file. Use empty string when creating new files.",
+            },
+            "new_str": {
+                "type": "string",
+                "description": "Text to replace old_str with, or the content for new files.",
+            },
         },
-        "new_str": {"type": "string", "description": "Text to replace old_str with"},
+        "required": ["path", "old_str", "new_str"],
     },
 )
 def edit_file(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
@@ -407,8 +448,12 @@ def edit_file(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
     new_str = input_data.get("new_str", "")
 
     # Validate inputs
-    if not path or old_str == new_str:
-        return "", Exception("invalid input parameters")
+    if not path:
+        return "", Exception("ERROR: missing required parameter: path")
+    if "new_str" not in input_data:
+        return "", Exception("ERROR: missing required parameter: new_str")
+    if old_str == new_str:
+        return "", Exception("ERROR: old_str must be different from new_str")
 
     try:
         try:
@@ -420,14 +465,14 @@ def edit_file(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
             if old_str == "":
                 # Create a new file if old_str is empty
                 return create_new_file(path, new_str)
-            return "", Exception(f"File not found: {path}")
+            return "", Exception(f"ERROR: file '{path}' not found")
 
         # Replace the text
         new_content = content.replace(old_str, new_str)
 
         # Check if any replacements were made
         if content == new_content and old_str:
-            return "", Exception("old_str not found in file")
+            return "", Exception("ERROR: old_str not found in file")
 
         # Write the modified content
         with open(path, "w", encoding="utf-8") as file:
@@ -490,6 +535,8 @@ def main():
 
     # Create the agent with the Anthropic client, user input function, and tool registry
     agent = Agent(client, get_user_message, tool_registry)
+    print(f'Using model: {os.environ.get("ANTHROPIC_MODEL", DEFAULT_MODEL)}')
+    print(f"Available tools: {[tool.name for tool in tool_registry.get_all_tools()]}")
 
     try:
         # Start the agent's conversation loop

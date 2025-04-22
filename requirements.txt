@@ -1,0 +1,6 @@
+# Basic Python requirements
+pip>=25.0
+setuptools>=65.5
+python-dotenv>=1.1
+# Add your project dependencies below
+anthropic>=0.49

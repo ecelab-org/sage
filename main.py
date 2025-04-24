@@ -261,9 +261,8 @@ class Agent:
                         content.get("name", ""),
                         content.get("input", {}),
                     )
-                    # Only add non-empty tool results (to prevent API errors)
-                    if result and result.get("content"):
-                        tool_results.append(result)
+                    # Always include tool results to satisfy the API requirement
+                    tool_results.append(result)
 
             # Determine whether to get more user input or continue with tool results
             if not tool_results:

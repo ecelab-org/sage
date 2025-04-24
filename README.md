@@ -2,10 +2,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-An interactive AI assistant powered by Anthropic's Claude that performs file operations on your local system through natural language commands.
+An interactive AI assistant powered by Anthropic's Claude that performs various automation tasks through natural language commands, including file operations, web scraping, and more.
 
 ## 📋 Overview
-Sage bridges the gap between AI capabilities and local file system operations. With a simple chat interface, you can ask Sage to read files, create new code, modify existing files, and navigate your filesystem—all using natural language instructions.
+Sage bridges the gap between AI capabilities and system automation. With a simple chat interface, you can ask Sage to read and modify files, scrape web content, gather information, generate code, and perform a variety of tasks—all using natural language instructions.
 
 ## ✨ Features
 - **Interactive Chat Interface**: Communicate with Anthropic Claude models conversationally
@@ -14,6 +14,10 @@ Sage bridges the gap between AI capabilities and local file system operations. W
   - List and navigate directories
   - Edit existing files with precise text replacements
   - Create new files with AI-generated content
+- **Web Integration**:
+  - Scrape content from websites
+  - Extract text, HTML, or links from web pages
+  - Process online information for analysis
 - **Smart Configuration**:
   - Environment-based setup
   - Automatic virtual environment management
@@ -88,6 +92,36 @@ Makes changes to text files by replacing specified content. Can also create new 
 
 **Example:** "Create a new file called app.py with a Flask hello world app" or "In main.py, replace the print statement with a logging statement"
 
+### `web_scraper`
+Scrapes content from websites, with options to extract text, HTML, or links from specific page elements.
+
+**Example:** "Scrape the main article content from this URL" or "Extract all links from the navigation menu at example.com"
+
+**Real-world Example:**
+<pre>Activating virtual environment and starting program...
+Using model: claude-3-7-sonnet-latest
+Available embedded tools: ['str_replace_editor']
+Available custom tools: ['read_file', 'list_files', 'edit_file', 'web_scraper']
+Chat with Claude (use 'ctrl-c' to quit)
+
+🧑 <span style="color:blue;"><b>You:</b></span> what is the current price of VTI ETF?
+🤖 <span style="color:yellow;"><b>Claude:</b></span> I'll help you find the current price of the VTI ETF (Vanguard Total Stock Market ETF). Let me retrieve this information from a financial website.
+🔧 <span style="color:green;"><b>tool:</b></span> web_scraper({"url": "https://finance.yahoo.com/quote/VTI"})
+🤖 <span style="color:yellow;"><b>Claude:</b></span> Based on the information I retrieved from Yahoo Finance, the current price of VTI (Vanguard Total Stock Market Index Fund ETF) is:
+
+- Current price: $264.39 (after hours price as of April 23)
+- Regular market close price: $263.44 (+$4.41, +1.70%)
+
+Additional information about VTI:
+- Previous close: $259.03
+- Day's range: $262.60 - $268.38
+- 52-week range: $236.42 - $303.39
+- Volume: 6,807,935
+- Expense ratio: 0.03%
+- Yield: 1.36%
+
+This is the Vanguard Total Stock Market ETF that tracks the performance of the entire U.S. stock market, including large-, mid-, small-, and micro-cap stocks.</pre>
+
 ### Embedded Tools
 Sage also leverages Claude's built-in capabilities with embedded tools:
 
@@ -119,6 +153,8 @@ This demonstrates how Sage can create complex, well-designed files from simple n
 ```
 sage/
 ├── main.py                   # Main application code with agent implementation
+├── tools/                    # Tool implementations
+│   └── web_scraper.py        # Web scraping functionality
 ├── runme.sh                  # Setup and run script
 ├── runme_documentation.html  # AI-generated interactive documentation
 ├── requirements.txt          # Python dependencies

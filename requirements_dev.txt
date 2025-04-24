@@ -1,3 +1,6 @@
 # Basic Python dev requirements
 mypy
 black
+
+# Type checking and linting of varrious packages
+types-requests

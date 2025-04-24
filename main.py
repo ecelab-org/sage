@@ -32,6 +32,8 @@ from anthropic.types import (
 )
 from dotenv import load_dotenv
 
+from tools.web_scraper import scrape_website
+
 # Load environment variables from .env file (containing API keys)
 load_dotenv()
 
@@ -229,7 +231,7 @@ class Agent:
         while True:
             # Get user input if needed
             if read_user_input:
-                print("\033[94mYou\033[0m: ", end="")
+                print("\n\U0001f9d1 \033[94mYou\033[0m: ", end="")
                 user_input, ok = self.input_handler()
                 if not ok:
                     break  # Exit if user input couldn't be retrieved (e.g., Ctrl+C)
@@ -251,7 +253,7 @@ class Agent:
                 content_type = content.get("type")
                 if content_type == "text":
                     # Display text responses from the AI
-                    print(f"\033[93mClaude\033[0m: {content.get('text', '')}")
+                    print(f"\U0001f916 \033[93mClaude\033[0m: {content.get('text', '')}")
                 elif content_type == "tool_use":
                     # Execute tools requested by the AI
                     result = self.execute_tool(
@@ -298,7 +300,7 @@ class Agent:
             }
 
         # Log tool execution
-        print(f"\033[92mtool\033[0m: {name}({json.dumps(input_data)})")
+        print(f"\U0001f527 \033[92mtool\033[0m: {name}({json.dumps(input_data)})")
 
         # Execute the tool function
         response, err = tool_def.function(input_data)
@@ -692,6 +694,72 @@ def edit_file(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
         # If old_str is empty, create a new file
         return create_new_file(file_path=Path(path), content=new_str)
     return _edit_file(file_path=Path(path), old_str=old_str, new_str=new_str)
+
+
+# Register the web scraper tool
+@register_tool(
+    name="web_scraper",
+    description=(
+        "Scrape content from websites. This tool can extract text, HTML, or links from a webpage. "
+        "Use it to gather information from online sources for analysis or reference."
+    ),
+    input_schema={
+        "properties": {
+            "url": {
+                "type": "string",
+                "description": (
+                    "The complete URL of the website to scrape (must include http:// or https://)."
+                ),
+            },
+            "params": {
+                "type": "object",
+                "description": "Optional parameters to customize the scraping behavior.",
+                "properties": {
+                    "selector": {
+                        "type": "string",
+                        "description": (
+                            "CSS selector to target specific elements (e.g., 'div.content', 'h1', "
+                            "'.main-article'). Defaults to 'body'."
+                        ),
+                    },
+                    "extract": {
+                        "type": "string",
+                        "enum": ["text", "html", "links"],
+                        "description": (
+                            "What to extract: 'text' (plain text), 'html' (HTML markup), or "
+                            "'links' (all hyperlinks). Defaults to 'text'."
+                        ),
+                    },
+                    "timeout": {
+                        "type": "number",
+                        "description": "Request timeout in seconds. Defaults to 10 seconds.",
+                    },
+                },
+            },
+        },
+        "required": ["url"],
+        "examples": [
+            {"url": "https://example.com"},
+            {"url": "https://example.com", "params": {"selector": "main", "extract": "text"}},
+            {"url": "https://example.com", "params": {"selector": "nav", "extract": "links"}},
+        ],
+    },
+)
+def web_scraper(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
+    """
+    Scrape content from a website.
+
+    Examples:
+    - Basic usage: web_scraper({"url": "https://example.com"})
+    - Extract text from specific element: web_scraper({"url": "https://example.com", "params": {"selector": "main"}})
+    - Extract links from navigation: web_scraper({"url": "https://example.com", "params": {"selector": "nav", "extract": "links"}})
+    - Extract HTML from article: web_scraper({"url": "https://example.com", "params": {"selector": "article", "extract": "html"}})
+
+    Returns:
+        For text/html: String containing the extracted content
+        For links: JSON string with an array of {text, href} objects
+    """
+    return scrape_website(input_data)
 
 
 def main():

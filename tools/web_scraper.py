@@ -67,8 +67,22 @@ def scrape_website(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]
             return "URL is required", None
 
         # ----- HTTP Request -----
-        # Make GET request to the URL with headers and timeout
-        response = requests.get(url, headers=headers, timeout=timeout)
+        # Create a session to maintain cookies
+        session = requests.Session()
+        session.headers.update(headers)
+        # Add more browser-like headers
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/91.0.4472.124 Safari/537.36"
+            ),
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+        }
+        # Make GET request with explicit redirect following
+        response = session.get(url, headers=headers, timeout=timeout, allow_redirects=True)
         # Raise exception for HTTP errors (4xx, 5xx)
         response.raise_for_status()
 

@@ -11,13 +11,18 @@ additional capabilities by registering new tool functions.
 
 import json
 import os
+from dataclasses import dataclass
+from pathlib import Path
 from typing import (
     Any,
     Callable,
     Dict,
     List,
+    Mapping,
     Optional,
+    Sequence,
     Tuple,
+    Union,
 )
 
 import anthropic
@@ -34,27 +39,58 @@ load_dotenv()
 DEFAULT_MODEL = "claude-3-5-haiku-20241022"
 
 
+@dataclass(frozen=True)
 class ToolDefinition:
     """
+    Defines a tool that can be used by an AI agent to interact with external systems.
+    A tool represents an action that an AI can take in the world. Each tool consists of
+    a name, description, input schema, and an implementation function that executes
+    the actual operation when called by the AI.
+    Attributes:
+        name (str): Name of the tool, used by the AI to invoke it.
+        description (str): Human-readable description of what the tool does.
+        input_schema (Dict[str, Any]): JSON schema defining expected inputs and their types.
+        function (Callable[[Dict[str, Any]], Tuple[str, Optional[Exception]]]):
+            Implementation function to be called when the tool is invoked.
+            Takes input parameters as a dictionary and returns a tuple of:
+            - A string containing the result or error message
+            - An optional Exception object if an error occurred
+        is_embedded (bool): Flag indicating if this is an Anthropic-defined embedded tool.
+            Defaults to False.
+        embedded_type (Optional[str]): Type of the embedded tool, if applicable.
+            Required if is_embedded is True.
+        compatible_models (Optional[Sequence[str]]): List of model identifiers that can use this tool.
+            If None, all models can use it. Required if is_embedded is True.
+    Note:
+        This class serves as a contract between the AI's intentions and the actual
+        system functionality, ensuring inputs are properly validated and outputs
+        are correctly formatted.
+    Raises:
+        ValueError: If an embedded tool is missing embedded_type or compatible_models.
     Defines a tool that the AI agent can use to interact with the system.
-
-    Each tool has a name, description, input schema, and an implementation function.
-    This class serves as a contract between the AI and the actual functionality.
     """
 
-    def __init__(
-        self,
-        name: str,
-        description: str,
-        input_schema: Dict[str, Any],
-        function: Callable[[Dict[str, Any]], Tuple[str, Optional[Exception]]],
-    ):
-        self.name = name  # Name of the tool, used by the AI to invoke it
-        self.description = (
-            description  # Human-readable description of what the tool does
-        )
-        self.input_schema = input_schema  # JSON schema defining expected inputs
-        self.function = function  # Actual implementation function to be called
+    name: str  # Name of the tool, used by the AI to invoke it
+    description: str  # Human-readable description of what the tool does
+    input_schema: Dict[str, Any]  # JSON schema defining expected inputs
+    function: Callable[
+        [Dict[str, Any]], Tuple[str, Optional[Exception]]
+    ]  # Actual implementation function to be called
+    is_embedded: bool = False  # Flag indicating if this is an Anthropic-defined embedded tool
+    embedded_type: Optional[str] = None  # Type of the embedded tool, if applicable
+    compatible_models: Optional[Sequence[str]] = (
+        None  # Models that can use this tool - if None, all models can use it
+    )
+
+    def __post_init__(self):
+        """
+        Validate that embedded tools have an embedded type and compatible models specified.
+        """
+        if self.is_embedded and self.embedded_type is None:
+            raise ValueError("Embedded tools must have an embedded_type specified")
+
+        if self.is_embedded and self.compatible_models is None:
+            raise ValueError("Embedded tools must have compatible_models specified")
 
 
 class ToolRegistry:
@@ -103,7 +139,14 @@ class ToolRegistry:
 tool_registry = ToolRegistry()
 
 
-def register_tool(name: str, description: str, input_schema: Dict[str, Any]):
+def register_tool(
+    name: str,
+    description: str,
+    input_schema: Dict[str, Any],
+    is_embedded: bool = False,
+    embedded_type: Optional[str] = None,
+    compatible_models: Optional[Sequence[str]] = None,
+) -> Callable[[Callable], Callable]:
     """
     Decorator to register a function as a tool.
 
@@ -115,6 +158,9 @@ def register_tool(name: str, description: str, input_schema: Dict[str, Any]):
         description: A human-readable description of what the tool does
         input_schema: JSON schema defining the expected inputs and required fields.
                      Should include a "properties" dict and a "required" list.
+        is_embedded: Flag indicating if this is an Anthropic-defined embedded tool
+        embedded_type: Type of the embedded tool, if applicable
+        compatible_models: Models that can use this tool
 
     Returns:
         A decorator function that registers the decorated function as a tool
@@ -125,11 +171,15 @@ def register_tool(name: str, description: str, input_schema: Dict[str, Any]):
         properties = input_schema.get("properties", {})
         required = input_schema.get("required", [])
 
+        # Create a ToolDefinition object and register it
         tool_def = ToolDefinition(
             name=name,
             description=description,
             input_schema={"properties": properties, "required": required},
             function=func,
+            is_embedded=is_embedded,
+            embedded_type=embedded_type,
+            compatible_models=compatible_models,
         )
         tool_registry.register(tool_def)
         return func
@@ -209,7 +259,9 @@ class Agent:
                         content.get("name", ""),
                         content.get("input", {}),
                     )
-                    tool_results.append(result)
+                    # Only add non-empty tool results (to prevent API errors)
+                    if result and result.get("content"):
+                        tool_results.append(result)
 
             # Determine whether to get more user input or continue with tool results
             if not tool_results:
@@ -219,11 +271,11 @@ class Agent:
             # If tools were executed, add their results to the conversation
             # instead of getting new user input
             read_user_input = False
+
+            # Create a well-formed content message with tool results
             conversation.append({"role": "user", "content": tool_results})
 
-    def execute_tool(
-        self, id_str: str, name: str, input_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def execute_tool(self, id_str: str, name: str, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Execute a tool requested by the AI.
 
@@ -255,7 +307,7 @@ class Agent:
             return {
                 "type": "tool_result",
                 "tool_use_id": id_str,
-                "content": f"[ERROR]: {error_msg}",
+                "content": error_msg,
             }
 
         return {"type": "tool_result", "tool_use_id": id_str, "content": response}
@@ -278,31 +330,49 @@ class Agent:
             {"role": msg["role"], "content": msg["content"]} for msg in conversation
         ]
 
-        # Format tools for the API
-        anthropic_tools = []
-        for tool in self.tool_registry.get_all_tools():
-            anthropic_tools.append(
-                ToolParam(
-                    name=tool.name,
-                    description=tool.description,
-                    input_schema={
-                        "type": "object",
-                        "properties": tool.input_schema.get("properties", {}),
-                        "required": tool.input_schema.get("required", []),
-                    },
-                )
-            )
+        # Create a list of tools to be passed to the API
+        tools: List[Union[ToolParam, Mapping[str, str]]] = []
 
         # Get model from environment variable or use default
         model = os.environ.get("ANTHROPIC_MODEL", DEFAULT_MODEL)
+
+        # Add tools from registry
+        # Filter tools based on model compatibility
+        # If a tool has no compatible models, it is available to all models
+        model_compatible_tools = [
+            tool
+            for tool in self.tool_registry.get_all_tools()
+            if not tool.compatible_models
+            or any(compatible_model in model for compatible_model in tool.compatible_models)
+        ]
+
+        # Add each tool to the tools list
+        for tool in model_compatible_tools:
+            # If it's a custom tool, add it with its input schema
+            if not tool.is_embedded:
+                tools.append(
+                    ToolParam(
+                        name=tool.name,
+                        description=tool.description,
+                        input_schema={
+                            "type": "object",
+                            "properties": tool.input_schema.get("properties", {}),
+                            "required": tool.input_schema.get("required", []),
+                        },
+                    )
+                )
+            else:
+                ## If it's an embedded tool, add it with its type
+                embedded_type = tool.embedded_type or ""  # to help type checking
+                tools.append({"name": tool.name, "type": embedded_type})
 
         try:
             # Call the Anthropic API
             response = self.client.messages.create(
                 model=model,
-                max_tokens=1024,
+                max_tokens=8192,
                 messages=messages,
-                tools=anthropic_tools,
+                tools=tools,  # type: ignore
             )
             return response.model_dump()
         except Exception as e:  # pylint: disable=broad-except
@@ -314,12 +384,148 @@ class Agent:
             }
 
 
+def get_user_message() -> Tuple[str, bool]:
+    """
+    Get a message from the user via standard input.
+
+    Returns:
+        Tuple of (user_input, success_flag)
+        The success_flag is False if input couldn't be read (e.g., Ctrl+C)
+    """
+    try:
+        user_input = input()
+        return user_input, True
+    except EOFError:
+        return "", False
+
+
+def _read_file(file_path: Path) -> Tuple[str, Optional[Exception]]:
+    """
+    Read the contents of a file.
+    """
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            content = file.read()
+        return content, None
+    except Exception as e:  # pylint: disable=broad-except
+        return "", e
+
+
+def create_new_file(file_path: Path, content: str) -> Tuple[str, Optional[Exception]]:
+    """
+    Create a new file with the specified content.
+
+    Args:
+        file_path: Path where the file should be created
+        content: Content to write to the file
+
+    Returns:
+        Tuple of (success_message, None) on success or ("", error) on failure
+    """
+    try:
+        # Create any necessary parent directories
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Write the content to the file
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(content)
+
+        return f"Successfully created file {file_path.as_posix()}", None
+    except Exception as e:  # pylint: disable=broad-except
+        return "", Exception(f"Failed to create file: {str(e)}")
+
+
+def _edit_file(file_path: Path, old_str: str, new_str: str) -> Tuple[str, Optional[Exception]]:
+    """
+    Edit a file by replacing occurrences of old_str with new_str.
+    If old_str is empty, create a new file with new_str as its content.
+    """
+    try:
+        try:
+            # Try to read the existing file
+            with open(file_path, "r", encoding="utf-8") as file:
+                content = file.read()
+        except FileNotFoundError:
+            return "", Exception(f"ERROR: file '{file_path.as_posix()}' not found")
+
+        if not old_str:
+            new_content = new_str
+        else:
+            # Replace the text
+            new_content = content.replace(old_str, new_str)
+
+            # Check if any replacements were made
+            if content == new_content:
+                return "", Exception(f"ERROR: '{old_str}' not found in file {file_path.as_posix()}")
+
+        # Write the modified content
+        return create_new_file(file_path=file_path, content=new_content)
+    except Exception as e:  # pylint: disable=broad-except
+        return "", e
+
+
 # TOOL IMPLEMENTATIONS
 
 
 @register_tool(
+    name="str_replace_editor",
+    description="Embedded tool: text editor for file operations (view, create, str_replace).",
+    input_schema={
+        "properties": {
+            "command": {"type": "string"},
+            "path": {"type": "string"},
+            "old_str": {"type": "string"},
+            "new_str": {"type": "string"},
+            "file_text": {"type": "string"},
+        },
+        "required": ["command", "path"],
+    },
+    is_embedded=True,
+    embedded_type="text_editor_20250124",
+    # This is the type that Claude uses to identify the tool
+    compatible_models=["claude-3-5-sonnet", "claude-3-7-sonnet"],
+    # List of models that can use this tool
+)
+def str_replace_editor(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
+    """
+    Handle Claude's built-in text editor commands: view, create, str_replace.
+    """
+    command = input_data.get("command")
+    path = input_data.get("path", "")
+
+    try:
+        if command == "view":
+            return _read_file(file_path=Path(path))
+
+        elif command == "create":
+            file_text = input_data.get("file_text", "")
+            return create_new_file(file_path=Path(path), content=file_text)
+
+        elif command == "str_replace":
+            old_str = input_data.get("old_str", "")
+            new_str = input_data.get("new_str", "")
+            # If old_str is empty, write new_str to the file
+            if not old_str:
+                return create_new_file(file_path=Path(path), content=new_str)
+            ret = _edit_file(file_path=Path(path), old_str=old_str, new_str=new_str)
+            # Check if the edit was successful
+            if ret[0]:
+                return "Text replaced successfully", None
+            # If the edit failed, return the error message
+            return ret
+        else:
+            return "", Exception(f"Unsupported command: {command}")
+
+    except Exception as e:  # pylint: disable=broad-except
+        return "", e
+
+
+@register_tool(
     name="read_file",
-    description="Read the contents of a given relative file path. Use this when you want to see what's inside a file. Do not use this with directory names.",
+    description=(
+        "Read the contents of a given relative file path. Use this when you want to see what's "
+        "inside a file. Do not use this with directory names."
+    ),
     input_schema={
         "properties": {
             "path": {
@@ -342,22 +548,27 @@ def read_file(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
     """
     path = input_data.get("path", "")
 
-    try:
-        with open(path, "r", encoding="utf-8") as file:
-            content = file.read()
-        return content, None
-    except Exception as e:  # pylint: disable=broad-except
-        return "", e
+    return (
+        _read_file(file_path=Path(path))
+        if path
+        else ("", Exception("ERROR: missing required parameter: path"))
+    )
 
 
 @register_tool(
     name="list_files",
-    description="List files and directories at a given path. If no path is provided, lists files in the current directory.",
+    description=(
+        "List files and directories at a given path. If no path is provided, lists files in the "
+        "current directory."
+    ),
     input_schema={
         "properties": {
             "path": {
                 "type": "string",
-                "description": "Optional relative path to list files from. Defaults to current directory if not provided.",
+                "description": (
+                    "Optional relative path to list files from. Defaults to current directory if "
+                    "not provided."
+                ),
             }
         },
         "required": [],
@@ -389,9 +600,7 @@ def list_files(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
 
                 if rel_path != ".":
                     if os.path.isdir(full_path):
-                        files.append(
-                            f"{rel_path}/"
-                        )  # Add trailing slash to directories
+                        files.append(f"{rel_path}/")  # Add trailing slash to directories
                     else:
                         files.append(rel_path)
 
@@ -423,7 +632,9 @@ def list_files(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
             "path": {"type": "string", "description": "The path to the file"},
             "old_str": {
                 "type": "string",
-                "description": "Text to search for in existing file. Use empty string when creating new files.",
+                "description": (
+                    "Text to search for in existing file. Use empty string when creating new files."
+                ),
             },
             "new_str": {
                 "type": "string",
@@ -438,90 +649,49 @@ def edit_file(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
     Edit a text file by replacing text or create a new file.
 
     Args:
+        input_data: Dictionary containing the following keys:
+            - 'path': Path to the file (required)
+            - 'old_str': String to be replaced (required - empty for new file creation)
+            - 'new_str': Replacement string (required)
+
+    Raises:
+        Exception: If validation fails for any of the following reasons:
+            - 'path' parameter is missing
+            - 'old_str' parameter is missing
+            - 'new_str' parameter is missing
+            - 'old_str' equals 'new_str'
+            - 'path' is empty
+
+    Notes:
+        If 'old_str' is empty, a new file will be created with 'new_str' as content.
+        Otherwise, existing file at 'path' will be modified by replacing 'old_str' with 'new_str'.
         input_data: Dictionary containing 'path', 'old_str', and 'new_str' keys
 
     Returns:
         Tuple of (success_message, None) on success or ("", error) on failure
     """
+    # Validate inputs
+    if "path" not in input_data:  # Check if parameter exists
+        return "", Exception("ERROR: missing required parameter: path")
+    if "old_str" not in input_data:  # Check if parameter exists
+        return "", Exception("ERROR: missing required parameter: old_str")
+    if "new_str" not in input_data:  # Check if parameter exists
+        return "", Exception("ERROR: missing required parameter: new_str")
+
     path = input_data.get("path", "")
     old_str = input_data.get("old_str", "")
     new_str = input_data.get("new_str", "")
 
-    # Validate inputs
-    if not path:
-        return "", Exception("ERROR: missing required parameter: path")
-    if "new_str" not in input_data:
-        return "", Exception("ERROR: missing required parameter: new_str")
-    if old_str == new_str:
-        return "", Exception("ERROR: old_str must be different from new_str")
+    # Validate parameter values
+    if path == "":  # Check if path is empty
+        return "", Exception("ERROR: 'path' must not be empty")
+    if old_str == new_str:  # Check if old_str and new_str are the same
+        return "", Exception("ERROR: 'old_str' must be different from 'new_str'")
 
-    try:
-        try:
-            # Try to read the existing file
-            with open(path, "r", encoding="utf-8") as file:
-                content = file.read()
-        except FileNotFoundError:
-            # Handle case where file doesn't exist
-            if old_str == "":
-                # Create a new file if old_str is empty
-                return create_new_file(path, new_str)
-            return "", Exception(f"ERROR: file '{path}' not found")
-
-        # Replace the text
-        new_content = content.replace(old_str, new_str)
-
-        # Check if any replacements were made
-        if content == new_content and old_str:
-            return "", Exception("ERROR: old_str not found in file")
-
-        # Write the modified content
-        with open(path, "w", encoding="utf-8") as file:
-            file.write(new_content)
-
-        return "OK", None
-    except Exception as e:  # pylint: disable=broad-except
-        return "", e
-
-
-def create_new_file(file_path: str, content: str) -> Tuple[str, Optional[Exception]]:
-    """
-    Create a new file with the specified content.
-
-    Args:
-        file_path: Path where the file should be created
-        content: Content to write to the file
-
-    Returns:
-        Tuple of (success_message, None) on success or ("", error) on failure
-    """
-    try:
-        # Create any necessary parent directories
-        dir_path = os.path.dirname(file_path)
-        if dir_path and dir_path != ".":
-            os.makedirs(dir_path, exist_ok=True)
-
-        # Write the content to the file
-        with open(file_path, "w", encoding="utf-8") as file:
-            file.write(content)
-
-        return f"Successfully created file {file_path}", None
-    except Exception as e:  # pylint: disable=broad-except
-        return "", Exception(f"Failed to create file: {str(e)}")
-
-
-def get_user_message() -> Tuple[str, bool]:
-    """
-    Get a message from the user via standard input.
-
-    Returns:
-        Tuple of (user_input, success_flag)
-        The success_flag is False if input couldn't be read (e.g., Ctrl+C)
-    """
-    try:
-        user_input = input()
-        return user_input, True
-    except EOFError:
-        return "", False
+    if not old_str:
+        # If old_str is empty, create a new file
+        return create_new_file(file_path=Path(path), content=new_str)
+    return _edit_file(file_path=Path(path), old_str=old_str, new_str=new_str)
 
 
 def main():
@@ -535,8 +705,23 @@ def main():
 
     # Create the agent with the Anthropic client, user input function, and tool registry
     agent = Agent(client, get_user_message, tool_registry)
-    print(f'Using model: {os.environ.get("ANTHROPIC_MODEL", DEFAULT_MODEL)}')
-    print(f"Available tools: {[tool.name for tool in tool_registry.get_all_tools()]}")
+
+    model = os.environ.get("ANTHROPIC_MODEL", DEFAULT_MODEL)
+    model_compatible_tools = [
+        tool
+        for tool in tool_registry.get_all_tools()
+        if not tool.compatible_models
+        or any(compatible_model in model for compatible_model in tool.compatible_models)
+    ]
+    print(f"Using model: {model}")
+    print(
+        "Available embedded tools: "
+        f"{[tool.name for tool in model_compatible_tools if tool.is_embedded]}"
+    )
+    print(
+        "Available custom tools: "
+        f"{[tool.name for tool in model_compatible_tools if not tool.is_embedded]}"
+    )
 
     try:
         # Start the agent's conversation loop

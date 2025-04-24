@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>runme.sh Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/bash.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #f8f9fa;
+            --code-bg: #282c34;
+            --text-color: #333;
+            --section-bg: white;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            margin-top: 25px;
+        }
+
+        .description {
+            font-size: 1.2rem;
+            margin: 15px 0;
+        }
+
+        .code-container {
+            background-color: var(--section-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        pre {
+            margin: 0;
+            border-radius: 0 0 8px 8px;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: 'Fira Code', Consolas, Monaco, 'Andale Mono', monospace;
+            font-size: 0.9rem;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .code-header {
+            background-color: #f1f1f1;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .code-title {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .code-buttons button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.3s;
+        }
+
+        .code-buttons button:hover {
+            background-color: #2980b9;
+        }
+
+        .section {
+            background-color: var(--section-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .collapsible {
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: 0.4s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .active, .collapsible:hover {
+            background-color: #2980b9;
+        }
+
+        .collapsible:after {
+            content: '+';
+            font-weight: bold;
+            float: right;
+            margin-left: 5px;
+        }
+
+        .active:after {
+            content: '-';
+        }
+
+        .content {
+            padding: 0 18px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: var(--section-bg);
+            border-radius: 0 0 8px 8px;
+        }
+
+        .function-description {
+            background-color: rgba(46, 204, 113, 0.1);
+            border-left: 4px solid var(--secondary-color);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .note {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        /* Flowchart styling */
+        .flowchart {
+            margin: 40px 0;
+            text-align: center;
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .dark-mode .flowchart {
+            background-color: #2d2d2d;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .flowchart svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .flowchart img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dark mode toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        /* Dark mode colors */
+        body.dark-mode {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #1a1a1a;
+            --code-bg: #282c34;
+            --text-color: #f5f5f5;
+            --section-bg: #2c2c2c;
+            --border-color: #444;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            header {
+                padding: 30px 15px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" id="darkModeToggle">🌓</button>
+
+    <div class="container">
+        <header>
+            <h1>runme.sh Documentation</h1>
+            <p class="description">A comprehensive guide to the virtual environment setup and management script</p>
+        </header>
+
+        <section class="section">
+            <h2>Script Overview</h2>
+            <p>The <code>runme.sh</code> script is designed to automate the creation, verification, and management of a Python virtual environment. It ensures that dependencies are properly maintained, and provides a clean way to run Python applications with the correct dependencies.</p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="code-title">Complete runme.sh Script</div>
+                    <div class="code-buttons">
+                        <button id="copyFullCode">Copy Code</button>
+                    </div>
+                </div>
+                <pre><code class="language-bash">#!/usr/bin/env bash
+
+# Exit on errors
+set -e
+
+# Get script directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+VENV_DIR="$SCRIPT_DIR/venv"
+REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"
+
+# Check if requirements.txt exists
+if [ ! -f "$REQUIREMENTS_FILE" ]; then
+    echo "Creating requirements.txt file..."
+    echo "python-dotenv>=1.1" > "$REQUIREMENTS_FILE"
+fi
+
+# Function to create virtual environment
+create_venv() {
+    echo "Creating virtual environment..."
+    python3.11 -m venv "$VENV_DIR"
+    touch "$VENV_DIR/.last_update"
+}
+
+# Function to update virtual environment
+update_venv() {
+    echo "Updating virtual environment..."
+    "$VENV_DIR/bin/pip" install --upgrade pip
+    "$VENV_DIR/bin/pip" install -r "$REQUIREMENTS_FILE"
+    touch "$VENV_DIR/.last_update"
+}
+
+# Check if virtual environment exists
+if [ ! -d "$VENV_DIR" ]; then
+    echo "Virtual environment not found."
+    create_venv
+    update_venv
+else
+    echo "Virtual environment found."
+
+    # Check if requirements.txt has been modified since last update
+    VENV_LAST_UPDATE=$(stat -c %Y "$VENV_DIR/.last_update" 2>/dev/null || echo 0)
+    REQUIREMENTS_LAST_MODIFIED=$(stat -c %Y "$REQUIREMENTS_FILE" 2>/dev/null || echo 0)
+
+    if [ "$REQUIREMENTS_LAST_MODIFIED" -gt "$VENV_LAST_UPDATE" ]; then
+        echo "Requirements file has been modified since last update."
+        update_venv
+    else
+        echo "Requirements file hasn't changed. Using existing virtual environment."
+    fi
+fi
+
+# Activate virtual environment and run the program
+echo "Activating virtual environment and starting program..."
+source "$VENV_DIR/bin/activate"
+
+# Run the main program
+python "$SCRIPT_DIR/main.py"
+
+# Deactivate virtual environment when done
+echo "Program exited. Deactivating virtual environment..."
+deactivate</code></pre>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Script Components</h2>
+
+            <button class="collapsible">Initialization and Setup</button>
+            <div class="content">
+                <div class="code-container">
+                    <pre><code class="language-bash">#!/usr/bin/env bash
+
+# Exit on errors
+set -e
+
+# Get script directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+VENV_DIR="$SCRIPT_DIR/venv"
+REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"</code></pre>
+                </div>
+                <p>This section initializes the script and sets up important variables:</p>
+                <ul>
+                    <li><strong>#!/usr/bin/env bash</strong> - The shebang line that tells the system to use bash to interpret the script.</li>
+                    <li><strong>set -e</strong> - Sets the script to exit immediately if any command exits with a non-zero status, helping to prevent errors from cascading.</li>
+                    <li><strong>SCRIPT_DIR</strong> - Determines the directory where the script is located, regardless of where it's called from.</li>
+                    <li><strong>VENV_DIR</strong> - Defines the location of the virtual environment as a subdirectory of the script location.</li>
+                    <li><strong>REQUIREMENTS_FILE</strong> - Specifies the path to the requirements.txt file with the Python dependencies.</li>
+                </ul>
+                <div class="note">
+                    <p>The technique used to get the script directory is a common bash idiom that works regardless of whether the script is executed directly or sourced from another script.</p>
+                </div>
+            </div>
+
+            <button class="collapsible">Requirements File Verification</button>
+            <div class="content">
+                <div class="code-container">
+                    <pre><code class="language-bash"># Check if requirements.txt exists
+if [ ! -f "$REQUIREMENTS_FILE" ]; then
+    echo "Creating requirements.txt file..."
+    echo "python-dotenv>=1.1" > "$REQUIREMENTS_FILE"
+fi</code></pre>
+                </div>
+                <p>This section ensures that a requirements.txt file exists:</p>
+                <ul>
+                    <li>It checks if the requirements.txt file exists at the expected location.</li>
+                    <li>If the file is missing, it creates a new one with a basic dependency (python-dotenv>=1.1).</li>
+                </ul>
+                <div class="note">
+                    <p>This ensures the script won't fail if a user forgets to include a requirements file. By default, it adds python-dotenv as a minimum requirement.</p>
+                </div>
+            </div>
+
+            <button class="collapsible">Virtual Environment Functions</button>
+            <div class="content">
+                <div class="code-container">
+                    <pre><code class="language-bash"># Function to create virtual environment
+create_venv() {
+    echo "Creating virtual environment..."
+    python3.11 -m venv "$VENV_DIR"
+    touch "$VENV_DIR/.last_update"
+}
+
+# Function to update virtual environment
+update_venv() {
+    echo "Updating virtual environment..."
+    "$VENV_DIR/bin/pip" install --upgrade pip
+    "$VENV_DIR/bin/pip" install -r "$REQUIREMENTS_FILE"
+    touch "$VENV_DIR/.last_update"
+}</code></pre>
+                </div>
+                <h3>create_venv Function</h3>
+                <div class="function-description">
+                    <p>Creates a new Python virtual environment using Python 3.11.</p>
+                    <ul>
+                        <li>The virtual environment is created at the path specified by $VENV_DIR</li>
+                        <li>Creates a timestamp file (.last_update) to track when the environment was last updated</li>
+                    </ul>
+                </div>
+
+                <h3>update_venv Function</h3>
+                <div class="function-description">
+                    <p>Updates the packages in the virtual environment.</p>
+                    <ul>
+                        <li>Upgrades pip to the latest version</li>
+                        <li>Installs or updates all dependencies listed in requirements.txt</li>
+                        <li>Updates the timestamp in .last_update to record when this update occurred</li>
+                    </ul>
+                </div>
+                <div class="note">
+                    <p>These functions are defined but not executed until needed later in the script. This is a common pattern in bash scripting to improve readability and maintainability.</p>
+                </div>
+            </div>
+
+            <button class="collapsible">Virtual Environment Management</button>
+            <div class="content">
+                <div class="code-container">
+                    <pre><code class="language-bash"># Check if virtual environment exists
+if [ ! -d "$VENV_DIR" ]; then
+    echo "Virtual environment not found."
+    create_venv
+    update_venv
+else
+    echo "Virtual environment found."
+
+    # Check if requirements.txt has been modified since last update
+    VENV_LAST_UPDATE=$(stat -c %Y "$VENV_DIR/.last_update" 2>/dev/null || echo 0)
+    REQUIREMENTS_LAST_MODIFIED=$(stat -c %Y "$REQUIREMENTS_FILE" 2>/dev/null || echo 0)
+
+    if [ "$REQUIREMENTS_LAST_MODIFIED" -gt "$VENV_LAST_UPDATE" ]; then
+        echo "Requirements file has been modified since last update."
+        update_venv
+    else
+        echo "Requirements file hasn't changed. Using existing virtual environment."
+    fi
+fi</code></pre>
+                </div>
+                <p>This section manages the virtual environment's lifecycle:</p>
+                <ol>
+                    <li>First, it checks if the virtual environment directory exists:
+                        <ul>
+                            <li>If it doesn't exist, it calls the functions to create and update a new environment</li>
+                        </ul>
+                    </li>
+                    <li>If the virtual environment already exists, it checks if it needs updating:
+                        <ul>
+                            <li>Compares the timestamp of when the virtual environment was last updated</li>
+                            <li>Compares it with the timestamp of when requirements.txt was last modified</li>
+                            <li>If requirements.txt is newer, it updates the virtual environment</li>
+                            <li>Otherwise, it uses the existing environment without changes</li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="note">
+                    <p>The <code>stat -c %Y</code> command is used to get the last modification time in seconds since the epoch. The <code>|| echo 0</code> part provides a fallback value of 0 if the file doesn't exist or if stat fails for any reason.</p>
+                </div>
+            </div>
+
+            <button class="collapsible">Execution and Cleanup</button>
+            <div class="content">
+                <div class="code-container">
+                    <pre><code class="language-bash"># Activate virtual environment and run the program
+echo "Activating virtual environment and starting program..."
+source "$VENV_DIR/bin/activate"
+
+# Run the main program
+python "$SCRIPT_DIR/main.py"
+
+# Deactivate virtual environment when done
+echo "Program exited. Deactivating virtual environment..."
+deactivate</code></pre>
+                </div>
+                <p>This final section executes the main program and cleans up:</p>
+                <ol>
+                    <li>Activates the virtual environment using the <code>source</code> command</li>
+                    <li>Executes the main Python program (main.py)</li>
+                    <li>Once the Python program completes, it deactivates the virtual environment</li>
+                </ol>
+                <div class="warning">
+                    <p>The script assumes there's a <code>main.py</code> file in the same directory. If this file is missing or named differently, the script will fail at this point.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Script Flow Diagram</h2>
+            <p>The following diagram illustrates the execution flow of the runme.sh script:</p>
+
+            <div class="flowchart">
+                <svg width="800" height="1000" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Background grid for better visualization -->
+                    <defs>
+                        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#00000033"/>
+                        </filter>
+                        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                            markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#2c3e50"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Start -->
+                    <rect x="300" y="20" width="200" height="60" rx="30" ry="30" fill="#3498db" filter="url(#shadow)" />
+                    <text x="400" y="55" text-anchor="middle" fill="white" font-weight="bold" font-size="16">Start Script</text>
+
+                    <!-- Initialize Variables -->
+                    <rect x="300" y="120" width="200" height="60" rx="10" ry="10" fill="#f1c40f" filter="url(#shadow)" />
+                    <text x="400" y="155" text-anchor="middle" fill="#333" font-weight="bold" font-size="14">Initialize Variables</text>
+                    <line x1="400" y1="80" x2="400" y2="120" stroke="#2c3e50" stroke-width="2.5" marker-end="url(#arrow)" />
+
+                    <!-- Check if requirements.txt exists -->
+                    <path d="M 300,220 L 500,220 L 400,290 Z" fill="#e74c3c" filter="url(#shadow)" />
+                    <text x="400" y="250" text-anchor="middle" fill="white" font-weight="bold" font-size="14">requirements.txt exists?</text>
+                    <line x1="400" y1="180" x2="400" y2="220" stroke="#2c3e50" stroke-width="2.5" marker-end="url(#arrow)" />
+
+                    <!-- Create requirements.txt -->
+                    <rect x="100" y="230" width="160" height="60" rx="10" ry="10" fill="#f1c40f" filter="url(#shadow)" />
+                    <text x="180" y="265" text-anchor="middle" fill="#333" font-weight="bold" font-size="14">Create requirements.txt</text>
+                    <line x1="320" y1="255" x2="260" y2="255" stroke="#2c3e50" stroke-width="2.5" marker-end="url(#arrow)" />
+                    <text x="300" y="240" text-anchor="middle" fill="#333" font-weight="bold" font-size="14">No</text>
+
+                    <!-- Check if venv exists -->
+                    <path d="M 300,330 L 500,330 L 400,400 Z" fill="#e74c3c" filter="url(#shadow)" />
+                    <text x="400" y="360" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Virtual environment exists?</text>
+                    <line x1="400" y1="290" x2="400" y2="330" stroke="#2c3e50" stroke-width="2.5" marker-end="url(#arrow)" />
+                    <text x="420" y="310" text-anchor="middle" fill="#333" font-weight="bold" font-size="14">Yes</text>
+                    <line x1="180" y1="290" x2="180" y2="310" stroke="#2c3e50" stroke-width="2.5" />
+                    <line x1="180" y1="310" x2="350" y2="310" stroke="#2c3e50" stroke-width="2.5" marker-end="url(#arrow)" />
+
+                    <!-- Create venv -->
+                    <rect x="100" y="410" width="160" height="60" rx="10" ry="10" fill="#f1c40f" filter="url(#shadow)" />
+                    <text x="180" y="445" text-anchor="middle" fill="#333" font-weight="bold" font-size="14">Create Virtual Env</text>
+                    <line x1="330" y1="365" x2="250" y2="410" stroke="#2c3e50" stroke-width="2.5" marker-end="url(#arrow)" />
+                    <text x="300" y="395" text-anchor="middle" fill="#333" font-weight="bold" font-size="14">No</text>
+
+                    <!-- Check if requirements updated -->
+                    <path d="M 540,330 L 700,330 L 620,400 Z" fill="#e74c3c" filter="url(#shadow)" />
+                    <text x="620" y="360" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Requirements updated?</text>
+                    <line x1="470" y1="365" x2="540" y2="365" stroke="#2c3e50" stroke-width="2.5" marker-end="url(#arrow)" />
+                    <text x="500" y="345" text-anchor="middle" fill="#333" font-weight="bold" font-size="14">Yes</text>
+
+                    <!-- Update venv -->
+                    <rect x="540" y="410" width="160" height="60" rx="10" ry="10" fill="#f1c40f" filter="url(#shadow)" />
+                    <text x="620" y="445" text-anchor="middle" fill="#333" font-weight="bold" font-size="14">Update Virtual Env</text>
+                    <line x1="620" y1="400" x2="620" y2="410" stroke="#2c3e50" stroke-width="2.5" marker-end="url(#arrow)" />
+                    <text x="595" y="405" text-anchor="middle" fill="#333" font-weight="bold" font-size="14">Yes</text>
+                    <line x1="180" y1="470" x2="180" y2="500" stroke="#2c3e50" stroke-width="2.5" />
+                    <line x1="180" y1="500" x2="300" y2="500" stroke="#2c3e50" stroke-width="2.5" marker-end="url(#arrow)" />
+
+                    <!-- Connect "No" from requirements updated -->
+                    <line x1="700" y1="365" x2="740" y2="365" stroke="#2c3e50" stroke-width="2.5" />
+                    <text x="710" y="345" text-anchor="middle" fill="#333" font-weight="bold" font-size="14">No</text>
+                    <line x1="740" y1="365" x2="740" y2="500" stroke="#2c3e50" stroke-width="2.5" />
+                    <line x1="740" y1="500" x2="480" y2="500" stroke="#2c3e50" stroke-width="2.5" marker-end="url(#arrow)" />
+
+                    <!-- Connect update venv to activate -->
+                    <line x1="620" y1="470" x2="620" y2="500" stroke="#2c3e50" stroke-width="2.5" />
+                    <line x1="620" y1="500" x2="480" y2="500" stroke="#2c3e50" stroke-width="2.5" marker-end="url(#arrow)" />
+
+                    <!-- Activate venv -->
+                    <rect x="320" y="480" width="160" height="60" rx="10" ry="10" fill="#2ecc71" filter="url(#shadow)" />
+                    <text x="400" y="515" text-anchor="middle" fill="#333" font-weight="bold" font-size="14">Activate Virtual Env</text>
+
+                    <!-- Run main.py -->
+                    <rect x="320" y="570" width="160" height="60" rx="10" ry="10" fill="#2ecc71" filter="url(#shadow)" />
+                    <text x="400" y="605" text-anchor="middle" fill="#333" font-weight="bold" font-size="14">Run main.py</text>
+                    <line x1="400" y1="540" x2="400" y2="570" stroke="#2c3e50" stroke-width="2.5" marker-end="url(#arrow)" />
+
+                    <!-- End -->
+                    <rect x="320" y="660" width="160" height="60" rx="30" ry="30" fill="#3498db" filter="url(#shadow)" />
+                    <text x="400" y="695" text-anchor="middle" fill="white" font-weight="bold" font-size="16">End Script</text>
+                    <line x1="400" y1="630" x2="400" y2="660" stroke="#2c3e50" stroke-width="2.5" marker-end="url(#arrow)" />
+                </svg>
+            </div>
+
+            <div class="note" style="margin-top: 20px">
+                <p><strong>Flowchart Legend:</strong></p>
+                <ul style="display: flex; flex-wrap: wrap; list-style-type: none; padding: 0; gap: 20px;">
+                    <li style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 20px; height: 20px; border-radius: 10px; background-color: #3498db; margin-right: 8px;"></span>
+                        Start/End points
+                    </li>
+                    <li style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 20px; height: 20px; border-radius: 3px; background-color: #f1c40f; margin-right: 8px;"></span>
+                        Process steps
+                    </li>
+                    <li style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 20px; height: 20px; border-radius: 3px; background-color: #e74c3c; margin-right: 8px;"></span>
+                        Decision points
+                    </li>
+                    <li style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 20px; height: 20px; border-radius: 3px; background-color: #2ecc71; margin-right: 8px;"></span>
+                        Execution steps
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Key Features</h2>
+            <ul>
+                <li><strong>Automatic Environment Setup</strong> - Creates a Python virtual environment if one doesn't exist</li>
+                <li><strong>Dependency Management</strong> - Ensures all required packages are installed and up to date</li>
+                <li><strong>Smart Updating</strong> - Only updates the virtual environment when the requirements have changed</li>
+                <li><strong>Error Prevention</strong> - Exits immediately if any command fails (set -e)</li>
+                <li><strong>Clean Environment Handling</strong> - Properly activates and deactivates the virtual environment</li>
+                <li><strong>Python 3.11 Specific</strong> - Designed to work with Python 3.11</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2>Usage</h2>
+            <p>To use this script:</p>
+            <ol>
+                <li>Make sure the script is executable:
+                    <div class="code-container">
+                        <pre><code class="language-bash">chmod +x runme.sh</code></pre>
+                    </div>
+                </li>
+                <li>Execute the script:
+                    <div class="code-container">
+                        <pre><code class="language-bash">./runme.sh</code></pre>
+                    </div>
+                </li>
+            </ol>
+            <div class="note">
+                <p>The script will create a requirements.txt file if one doesn't exist, set up a virtual environment, install all required packages, and then run the main.py script.</p>
+            </div>
+            <div class="warning">
+                <p>Make sure you have Python 3.11 installed on your system, as that's the specific version the script is set to use.</p>
+            </div>
+        </section>
+
+        <footer>
+            <p>runme.sh Documentation | Generated with AI Assistant</p>
+        </footer>
+    </div>
+
+    <script>
+        // Syntax highlighting
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+
+        // Copy button functionality
+        document.getElementById('copyFullCode').addEventListener('click', function() {
+            const fullCode = document.querySelector('.code-container pre code').textContent;
+            navigator.clipboard.writeText(fullCode).then(function() {
+                const originalText = document.getElementById('copyFullCode').textContent;
+                document.getElementById('copyFullCode').textContent = 'Copied!';
+                setTimeout(() => {
+                    document.getElementById('copyFullCode').textContent = originalText;
+                }, 2000);
+            }, function() {
+                alert('Failed to copy code.');
+            });
+        });
+
+        // Collapsible sections
+        document.querySelectorAll('.collapsible').forEach(button => {
+            button.addEventListener('click', function() {
+                this.classList.toggle('active');
+                const content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        });
+
+        // Dark mode toggle
+        document.getElementById('darkModeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        });
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+</body>
+</html>

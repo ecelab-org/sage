@@ -7,11 +7,6 @@ An interactive AI assistant powered by Anthropic's Claude that performs file ope
 ## 📋 Overview
 Sage bridges the gap between AI capabilities and local file system operations. With a simple chat interface, you can ask Sage to read files, create new code, modify existing files, and navigate your filesystem—all using natural language instructions.
 
-### Why Sage?
-- **Simplified Development Workflow**: Perform common file operations without leaving your terminal
-- **Natural Language Interface**: No need to remember complex command syntax
-- **Powered by Claude**: Leverage advanced AI understanding for accurate and helpful responses
-
 ## ✨ Features
 - **Interactive Chat Interface**: Communicate with Anthropic Claude models conversationally
 - **File System Operations**:

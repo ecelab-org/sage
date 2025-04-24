@@ -105,8 +105,11 @@ Available custom tools: ['read_file', 'list_files', 'edit_file', 'web_scraper']
 Chat with Claude (use 'ctrl-c' to quit)
 
 🧑 <span style="color:blue;"><b>You:</b></span> what is the current price of VTI ETF?
+
 🤖 <span style="color:yellow;"><b>Claude:</b></span> I'll help you find the current price of the VTI ETF (Vanguard Total Stock Market ETF). Let me retrieve this information from a financial website.
+
 🔧 <span style="color:green;"><b>tool:</b></span> web_scraper({"url": "https://finance.yahoo.com/quote/VTI"})
+
 🤖 <span style="color:yellow;"><b>Claude:</b></span> Based on the information I retrieved from Yahoo Finance, the current price of VTI (Vanguard Total Stock Market Index Fund ETF) is:
 
 - Current price: $264.39 (after hours price as of April 23)

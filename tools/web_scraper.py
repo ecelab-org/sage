@@ -36,8 +36,13 @@ def scrape_website(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]
     # ----- Parameter Extraction -----
     # Extract URL from input data with empty string fallback
     url = input_data.get("url", "")
-    # Extract optional parameters, defaulting to empty dict if not provided
+
+    # Extract optional parameters, with type checking
     params = input_data.get("params", {})
+    if not isinstance(params, dict):
+        # Log warning and use default empty dict if params is not a dictionary
+        print(f"Warning: 'params' should be an object/dictionary, got {type(params)}: {params}")
+        params = {}
 
     # ----- Parameter Processing -----
     # CSS selector for targeting specific elements (defaults to body)

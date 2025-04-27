@@ -22,9 +22,14 @@ Sage bridges the gap between AI capabilities and system automation. With a simpl
   - Environment-based setup
   - Automatic virtual environment management
   - Model selection through environment variables
+- **Workarea Management**:
+  - Dedicated workspace for generated files
+  - Optional cleanup of old files
+  - Isolated environment for project operations
 
 ## 🔧 Prerequisites
-- Python 3.11 or higher
+- Python 3.11 or higher (specifically checks for Python 3.11)
+- pip package manager
 - An Anthropic API key ([Get one here](https://console.anthropic.com/))
 - Linux/macOS/WSL terminal environment
 
@@ -50,12 +55,15 @@ Sage bridges the gap between AI capabilities and system automation. With a simpl
 The script automatically:
 - Creates a virtual environment if one doesn't exist
 - Installs all required dependencies from requirements.txt
+- Sets up a workarea directory for generated files
 - Runs the application
 
 ## 🚀 Usage
-1. Start Sage:
+1. Start Sage with optional flags:
    ```bash
-   ./runme.sh
+   ./runme.sh                # Run with default settings
+   ./runme.sh --keep-files   # Run without deleting old files
+   ./runme.sh --help         # View all command options
    ```
 
 2. Chat with Sage using natural language. Examples:
@@ -163,6 +171,7 @@ sage/
 ├── requirements.txt          # Python dependencies
 ├── requirements_dev.txt      # Development dependencies
 ├── .gitignore                # Git ignore configuration
+├── workarea/                 # Directory for generated files and workspace
 └── .env                      # Environment variables (not checked into git)
 ```
 
@@ -176,6 +185,15 @@ sage/
 2. Development tools included:
    - **mypy**: Static type checking
    - **black**: Code formatting
+
+### Understanding the Workarea
+The workarea directory is where Sage:
+- Runs the main program
+- Stores generated files
+- Maintains workspace isolation
+- Can clean up old files automatically (files older than 7 days)
+
+This directory is also exposed to the Python environment as the `SAGE_WORKAREA` environment variable.
 
 ### Adding New Tools
 You can extend Sage with new tools by following the pattern in `main.py`:
@@ -221,6 +239,7 @@ def your_tool_name(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]
 - **API Key Issues**: Ensure your Anthropic API key is correctly set in the `.env` file
 - **Python Version**: Verify you're using Python 3.11+ with `python --version`
 - **Permission Denied**: Make sure `runme.sh` is executable (`chmod +x runme.sh`)
+- **File Cleanup**: If you don't want old files deleted, use the `--keep-files` flag
 
 ## 🚧 Roadmap
 - Web UI interface

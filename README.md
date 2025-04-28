@@ -110,7 +110,7 @@ Scrapes content from websites, with options to extract text, HTML, or links from
 **Example:** "Scrape the main article content from this URL" or "Extract all links from the navigation menu at example.com"
 
 **Real-world Example:**
-<pre>🧑 <span style="color:blue;"><b>You:</b></span> what is the current price of VTI ETF?
+<pre>🧑 <span style="color:blue;"><b>You:</b></span> What is the current price of VTI ETF?
 
 🤖 <span style="color:yellow;"><b>Claude:</b></span> I'll help you find the current price of the VTI ETF (Vanguard Total Stock Market ETF). Let me retrieve this information from a financial website.
 
@@ -139,12 +139,35 @@ Executes Python code in a sandboxed environment and returns the results. Support
 
 **Example:** "Make a histogram from my data in myfile.csv" or "Plot the locations of the world's 20 most populated cities on a map with population indicators"
 
-**Real-world Example:**
+**Real-world Example 1:**
 <pre>🧑 <span style="color:blue;"><b>You:</b></span> Generate a simple plot of sine and cosine waves
 
 🤖 <span style="color:yellow;"><b>Claude:</b></span> I'll create a simple plot of sine and cosine waves using matplotlib. Let me execute the code for you.
 
-🔧 <span style="color:green;"><b>tool:</b></span> code_executor({"code": "import numpy as np\nimport matplotlib.pyplot as plt\n\n# Generate data points\nx = np.linspace(0, 2*np.pi, 100)\ny_sin = np.sin(x)\ny_cos = np.cos(x)\n\n# Create the plot\nplt.figure(figsize=(10, 6))\nplt.plot(x, y_sin, label='sin(x)', color='blue')\nplt.plot(x, y_cos, label='cos(x)', color='red')\n\n# Add labels and title\nplt.xlabel('x')\nplt.ylabel('y')\nplt.title('Sine and Cosine Functions')\nplt.legend()\nplt.grid(True)\n\n# Display the plot\nplt.tight_layout()"})
+🔧 <span style="color:green;"><b>tool:</b></span> code_executor({
+  "code": "import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate data points
+x = np.linspace(0, 2*np.pi, 100)
+y_sin = np.sin(x)
+y_cos = np.cos(x)
+
+# Create the plot
+plt.figure(figsize=(10, 6))
+plt.plot(x, y_sin, label='sin(x)', color='blue')
+plt.plot(x, y_cos, label='cos(x)', color='red')
+
+# Add labels and title
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Sine and Cosine Functions')
+plt.legend()
+plt.grid(True)
+
+# Display the plot
+plt.tight_layout()"
+})
 
 🔧 <span style="color:green;"><b>tool execution result:</b></span>
 Matplotlib initialized successfully in non-interactive mode.
@@ -165,6 +188,67 @@ The plot has been saved as "plot_0.png" in your current directory. You can view 
 
 Is there anything specific about these trigonometric functions you'd like me to explain, or would you like me to modify the plot in any way?</pre>
 
+**Real-world Example 2:**
+<pre>🧑 <span style="color:blue;"><b>You:</b></span> Plot the locations of the world's 20 most populated cities on a map with population indicators
+
+🤖 <span style="color:yellow;"><b>Claude:</b></span> I'll create a world map showing the 20 most populated cities with indicators for their populations. Let me write and execute the code for this visualization.
+
+🔧 <span style="color:green;"><b>tool:</b></span> code_executor({
+  "code": [Omitted for brevity]
+})
+
+🔧 <span style="color:green;"><b>tool execution result:</b></span>
+Matplotlib initialized successfully in non-interactive mode.
+
+Plots saved to files: plot_0.png
+
+1 plot(s) were generated.
+
+🤖 <span style="color:yellow;"><b>Claude:</b></span> The map has been successfully created. Let me explain what the visualization shows:
+
+### World's 20 Most Populated Cities Map Visualization
+
+I've created a world map displaying the locations of the 20 most populated cities in the world with population indicators. Here's what the visualization includes:
+
+1. **Base Map**: A global map with continents in light gray and oceans in light blue. Country borders and coastlines are displayed for better geographical context.
+
+2. **City Markers**: Each city is represented by a red circle whose size is proportional to its population - larger circles indicate larger populations.
+
+3. **City Labels**: Each city is clearly labeled with its name.
+
+4. **Population Indicators**: Below each city name, the population is shown in millions (e.g., "37.4 M" for Tokyo).
+
+5. **Legend**: A legend in the lower left corner of the map indicates what marker sizes correspond to different population levels.
+
+6. **Title**: The map is titled "World's 20 Most Populated Cities by Population (in millions)".
+
+### Featured Cities and Their Populations
+
+The map displays these major urban centers with their approximate populations in millions:
+
+1. Tokyo, Japan (37.4 million)
+2. Delhi, India (31.1 million)
+3. Shanghai, China (27.1 million)
+4. São Paulo, Brazil (22.0 million)
+5. Mexico City, Mexico (21.8 million)
+6. Cairo, Egypt (21.3 million)
+7. Mumbai, India (20.7 million)
+8. Beijing, China (20.5 million)
+9. Dhaka, Bangladesh (20.3 million)
+10. Osaka, Japan (19.2 million)
+11. New York, United States (18.8 million)
+12. Karachi, Pakistan (16.1 million)
+13. Chongqing, China (15.9 million)
+14. Istanbul, Turkey (15.2 million)
+15. Buenos Aires, Argentina (15.1 million)
+16. Kolkata, India (14.9 million)
+17. Lagos, Nigeria (14.4 million)
+18. Manila, Philippines (14.0 million)
+19. Guangzhou, China (13.6 million)
+20. Rio de Janeiro, Brazil (13.6 million)
+
+The visualization offers a clear global perspective on where the world's largest urban populations are concentrated, with particular density in Asia (especially East and South Asia), followed by significant population centers in the Americas, Africa, and Europe.</pre>
+
 ### Embedded Tools
 Sage also leverages Claude's built-in capabilities with embedded tools:
 
@@ -174,27 +258,27 @@ A powerful embedded text editor tool available with Claude 3.5 Sonnet and newer 
 **Example:** "Create a complete React component with state management in src/components/Counter.jsx"
 
 ## 🌟 Demonstration: AI-Generated Documentation
-Included in this repository is `runme_documentation.html`, an interactive HTML documentation file for the `runme.sh` script. This documentation was entirely generated by Sage itself with a simple prompt: "Create an interactive HTML documentation file for runme.sh". This demonstrates how easily Sage can create production-ready artifacts from natural language instructions.
+Included in this repository is an interactive HTML documentation file for the `runme.sh` script and a world map visualization. These examples were entirely generated by Sage itself with simple prompts like: "Create an interactive HTML documentation file for runme.sh" and "Plot the locations of the world's 20 most populated cities on a map with population indicators". This demonstrates how easily Sage can create production-ready artifacts from natural language instructions.
 
-Features of the generated documentation:
-- Interactive dark/light mode toggle
-- Collapsible sections with detailed explanations
-- Syntax-highlighted code examples
-- Visualized flowchart of the script execution
-- Responsive design for all devices
-
-To view the documentation:
+To view the examples:
 ```bash
-# Open in default browser
-xdg-open runme_documentation.html  # Linux
-open runme_documentation.html      # macOS
+# Open HTML documentation in default browser
+xdg-open examples/runme_documentation.html  # Linux
+open examples/runme_documentation.html      # macOS
+
+# Open world map visualization in default image viewer
+xdg-open examples/world_most_populated_cities.png  # Linux
+open examples/world_most_populated_cities.png      # macOS
 ```
 
-This demonstrates how Sage can create complex, well-designed files from simple natural language requests.
+These examples demonstrate how Sage can create complex, well-designed files from simple natural language requests.
 
 ## 📁 Project Structure
 ```
 sage/
+├── examples/                 # Example files generated by Sage
+│   ├── runme_documentation.html  # Sage-generated interactive documentation
+│   └── world_most_populated_cities.png  # Sage-generated map of most populated cities
 ├── tools/                    # Tool implementations
 │   ├── __init__.py           # Package initializer for tools module
 │   ├── code_executor.py      # Python code execution in sandbox
@@ -208,7 +292,6 @@ sage/
 ├── README.md                 # Project documentation (this file)
 ├── requirements_dev.txt      # Development dependencies
 ├── requirements.txt          # Python dependencies
-├── runme_documentation.html  # AI-generated interactive documentation
 └── runme.sh                  # Setup and run script
 ```
 

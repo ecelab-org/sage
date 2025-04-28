@@ -16,7 +16,7 @@ while [[ $# -gt 0 ]]; do
     --help)
       echo "Usage: $0 [OPTIONS]"
       echo "Options:"
-      echo "  --keep-files    Don't delete old files in workarea"
+      echo "  --clean-files   Delete files older than 7 days in workarea"
       echo "  --help          Show this help message"
       exit 0
       ;;

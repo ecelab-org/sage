@@ -66,7 +66,7 @@ The script automatically:
 1. Start Sage with optional flags:
    ```bash
    ./runme.sh                # Run with default settings
-   ./runme.sh --keep-files   # Run without deleting old files
+   ./runme.sh --clean-files  # Run and delete old files
    ./runme.sh --help         # View all command options
    ```
 

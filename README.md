@@ -200,7 +200,7 @@ Is there anything specific about these trigonometric functions you'd like me to 
 🔧 <span style="color:green;"><b>tool execution result:</b></span>
 Matplotlib initialized successfully in non-interactive mode.
 
-Plots saved to files: plot_0.png
+Plots saved to files: world_most_populated_cities.png
 
 1 plot(s) were generated.
 
@@ -248,6 +248,7 @@ The map displays these major urban centers with their approximate populations in
 20. Rio de Janeiro, Brazil (13.6 million)
 
 The visualization offers a clear global perspective on where the world's largest urban populations are concentrated, with particular density in Asia (especially East and South Asia), followed by significant population centers in the Americas, Africa, and Europe.</pre>
+[![World's Most Populated Cities Map](examples/world_most_populated_cities.png)](examples/world_most_populated_cities.png)
 
 ### Embedded Tools
 Sage also leverages Claude's built-in capabilities with embedded tools:

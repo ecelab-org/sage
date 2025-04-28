@@ -137,7 +137,7 @@ This is the Vanguard Total Stock Market ETF that tracks the performance of the e
 ### `code_executor`
 Executes Python code in a sandboxed environment and returns the results. Supports common data science libraries like numpy, pandas, matplotlib, and scipy.
 
-**Example:** "Run this Python function to analyze my data" or "Create a visualization of these numbers using matplotlib"
+**Example:** "Make a histogram from my data in myfile.csv" or "Plot the locations of the world's 20 most populated cities on a map with population indicators"
 
 **Real-world Example:**
 <pre>🧑 <span style="color:blue;"><b>You:</b></span> Generate a simple plot of sine and cosine waves
@@ -150,6 +150,8 @@ Executes Python code in a sandboxed environment and returns the results. Support
 Matplotlib initialized successfully in non-interactive mode.
 
 Plots saved to files: plot_0.png
+
+1 plot(s) were generated.
 
 🤖 <span style="color:yellow;"><b>Claude:</b></span> I've created a simple plot showing sine and cosine waves. The plot displays one complete cycle of both functions from 0 to 2π.
 

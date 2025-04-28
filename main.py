@@ -32,6 +32,13 @@ from anthropic.types import (
 )
 from dotenv import load_dotenv
 
+from common import (
+    print_blue,
+    print_green,
+    print_red,
+    print_yellow,
+)
+from tools.code_executor import execute_code
 from tools.web_scraper import scrape_website
 
 # Load environment variables from .env file (containing API keys)
@@ -61,7 +68,8 @@ class ToolDefinition:
             Defaults to False.
         embedded_type (Optional[str]): Type of the embedded tool, if applicable.
             Required if is_embedded is True.
-        compatible_models (Optional[Sequence[str]]): List of model identifiers that can use this tool.
+        compatible_models (Optional[Sequence[str]]): List of model identifiers that can use this
+            tool.
             If None, all models can use it. Required if is_embedded is True.
     Note:
         This class serves as a contract between the AI's intentions and the actual
@@ -189,6 +197,22 @@ def register_tool(
     return decorator
 
 
+def decode_escaped_strings(data: str) -> str:
+    """
+    Decode escaped Unicode strings in the input data.
+    This function handles both JSON-encoded strings and raw Unicode escape sequences.
+    Args:
+        data: The input string containing escaped Unicode sequences
+    Returns:
+        The decoded string with Unicode escape sequences replaced by their actual characters
+    """
+    # Decode JSON-encoded strings
+    if data.startswith('"') and data.endswith('"'):
+        data = data[1:-1]
+    # Decode Unicode escape sequences
+    return data.encode("utf-8").decode("unicode_escape")
+
+
 class Agent:
     """
     The main agent class that orchestrates interactions between the user, AI model,
@@ -231,7 +255,7 @@ class Agent:
         while True:
             # Get user input if needed
             if read_user_input:
-                print("\n\U0001f9d1 \033[94mYou\033[0m: ", end="")
+                print_blue("\n\U0001f9d1 You: ", end="")
                 user_input, ok = self.input_handler()
                 if not ok:
                     break  # Exit if user input couldn't be retrieved (e.g., Ctrl+C)
@@ -253,7 +277,7 @@ class Agent:
                 content_type = content.get("type")
                 if content_type == "text":
                     # Display text responses from the AI
-                    print(f"\U0001f916 \033[93mClaude\033[0m: {content.get('text', '')}")
+                    print_yellow(f"\U0001f916 Claude: {content.get('text', '')}")
                 elif content_type == "tool_use":
                     # Execute tools requested by the AI
                     result = self.execute_tool(
@@ -299,12 +323,22 @@ class Agent:
             }
 
         # Log tool execution
-        print(f"\U0001f527 \033[92mtool\033[0m: {name}({json.dumps(input_data)})")
+        print_green("\U0001f527 tool: ", end="")
+        print(
+            name
+            + f"({decode_escaped_strings(json.dumps(input_data, indent=2, ensure_ascii=False))})"
+        )
 
         # Execute the tool function
         response, err = tool_def.function(input_data)
+        # Log tool execution result
+        print_green("\U0001f527 tool execution result:")
+        print(f"{response}")
         if err:
             error_msg = str(err)
+            # Log tool execution error
+            print_red("\U0001f527 tool execution error message: ", end="")
+            print(f"{error_msg}")
             return {
                 "type": "tool_result",
                 "tool_use_id": id_str,
@@ -378,7 +412,7 @@ class Agent:
             return response.model_dump()
         except Exception as e:  # pylint: disable=broad-except
             # Handle API errors
-            print(f"Error during inference: {str(e)}")
+            print_red(f"Error during inference: {str(e)}")
             return {
                 "role": "assistant",
                 "content": [{"type": "text", "text": "Error during inference."}],
@@ -750,15 +784,67 @@ def web_scraper(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
 
     Examples:
     - Basic usage: web_scraper({"url": "https://example.com"})
-    - Extract text from specific element: web_scraper({"url": "https://example.com", "params": {"selector": "main"}})
-    - Extract links from navigation: web_scraper({"url": "https://example.com", "params": {"selector": "nav", "extract": "links"}})
-    - Extract HTML from article: web_scraper({"url": "https://example.com", "params": {"selector": "article", "extract": "html"}})
+    - Extract text from specific element: web_scraper({"url": "https://example.com", "params":
+      {"selector": "main"}})
+    - Extract links from navigation: web_scraper({"url": "https://example.com", "params":
+      {"selector": "nav", "extract": "links"}})
+    - Extract HTML from article: web_scraper({"url": "https://example.com", "params": {"selector":
+      "article", "extract": "html"}})
 
     Returns:
         For text/html: String containing the extracted content
         For links: JSON string with an array of {text, href} objects
     """
     return scrape_website(input_data)
+
+
+@register_tool(
+    name="code_executor",
+    description=(
+        "Execute Python code in a sandboxed environment and return the results. "
+        "This tool runs Python code for data analysis, algorithm testing, or visualization. "
+        "Supports common libraries like numpy, pandas, matplotlib, scipy, and more.\n\n"
+        "Examples:\n"
+        "- Basic calculation: `print(sum(range(10)))`\n"
+        "- Data analysis: `import pandas as pd; df = pd.DataFrame({'a': [1,2,3]}); print(df.describe())`\n"
+        "- Visualization: `import matplotlib.pyplot as plt; plt.plot([1,2,3]); plt.title('Sample Plot')`\n\n"
+        "Notes:\n"
+        "- When using HTTP requests, set header: `headers = {'User-Agent': 'Mozilla/5.0...'}`\n"
+        "- Saved plots will be stored as PNG files and paths will be returned\n"
+        "- Code execution is limited to the specified timeout\n"
+        "- Print results to see output in the response"
+    ),
+    input_schema={
+        "properties": {
+            "code": {
+                "type": "string",
+                "description": "Python code to execute (use print statements for output)",
+            },
+            "timeout": {
+                "type": "number",
+                "description": "Maximum execution time in seconds (default: 20, max: 40)",
+            },
+            "save_plots": {
+                "type": "boolean",
+                "description": "Whether to save matplotlib plots to files (default: true)",
+            },
+        },
+        "required": ["code"],
+    },
+)
+def code_executor(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
+    """
+    Execute Python code in a sandboxed environment and return the results.
+
+    Args:
+        input_data: Dictionary containing:
+            - code: Python code to execute
+            - timeout: Maximum execution time in seconds (default: 20, max: 40)
+            - save_plots: Whether to save matplotlib plots (default: False)
+    Returns:
+        Tuple of (result_content, exception)
+    """
+    return execute_code(input_data)
 
 
 def main():
@@ -794,13 +880,13 @@ def main():
         # Start the agent's conversation loop
         agent.run()
     except (anthropic.APIError, anthropic.APIConnectionError) as e:
-        print(f"Anthropic API Error: {str(e)}")
+        print_red(f"Anthropic API Error: {str(e)}")
     except (IOError, OSError) as e:
-        print(f"Input/Output Error: {str(e)}")
+        print_red(f"Input/Output Error: {str(e)}")
     except KeyboardInterrupt:
-        print("\nExiting due to user interrupt")
+        print_red("\nExiting due to user interrupt")
     except Exception as e:  # pylint: disable=broad-except
-        print(f"Unexpected error: {str(e)}")
+        print_red(f"Unexpected error: {str(e)}")
 
 
 if __name__ == "__main__":

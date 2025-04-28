@@ -117,6 +117,9 @@ def _create_sandbox_script(code: str, save_plots: bool) -> str:
         "backports_abc",  # Backport of ABC features to older Python versions
         "brotli",  # Compression algorithm library
         "brotlicffi",  # CFFI-based bindings for the Brotli compression library
+        "bs4",  # BeautifulSoup4 for HTML/XML parsing
+        "cartopy",  # Geospatial data visualization library
+        "cchardet",  # Fast character encoding detection library
         "certifi",  # Mozilla's CA Bundle for SSL certificate verification
         "chardet",  # Character encoding detection
         "charset_normalizer",  # Character set detection and normalization
@@ -124,6 +127,7 @@ def _create_sandbox_script(code: str, save_plots: bool) -> str:
         "collections",  # Container datatypes (dict, list, set, deque, etc)
         "colorama",  # Cross-platform colored terminal text
         "comm",  # Jupyter kernel communication protocol
+        "contextily",  # Contextual basemaps for web mapping
         "cPickle",  # C implementation of pickle (faster but legacy Python 2)
         "ctags",  # Source code indexing and tag generation
         "cycler",  # Composable style cycles for matplotlib
@@ -141,6 +145,7 @@ def _create_sandbox_script(code: str, save_plots: bool) -> str:
         "genericpath",  # OS-independent path operations
         "geopandas",  # Geospatial data analysis library
         "gi",  # GObject Introspection bindings for Python
+        "html5lib",  # HTML parser based on the WHATWG HTML5 specification
         "idna",  # Internationalized Domain Names in Applications support
         "importlib",  # Implementation of the import statement
         "io",  # Core tools for working with streams
@@ -152,6 +157,7 @@ def _create_sandbox_script(code: str, save_plots: bool) -> str:
         "kiwisolver",  # Fast implementation of the Cassowary constraint solver
         "Levenshtein",  # String similarity and edit distance metrics
         "logging",  # Python's built-in logging facility
+        "lxml",  # XML and HTML processing library
         "markupsafe",  # String handling for HTML/XML, escapes unsafe characters
         "matplotlib",  # Comprehensive visualization library
         "mimetypes",  # Mapping of filenames to MIME types
@@ -201,6 +207,7 @@ def _create_sandbox_script(code: str, save_plots: bool) -> str:
         "sklearn",  # Machine learning library (scikit-learn)
         "sksparse",  # Sparse matrix extensions for SciPy
         "socks",  # SOCKS proxy client module
+        "soupsieve",  # CSS selector library for BeautifulSoup
         "sphinx",  # Documentation generator
         "stack_data",  # Extract data from Python stack frames
         "stat",  # Utilities for interpreting os.stat() results
@@ -219,6 +226,7 @@ def _create_sandbox_script(code: str, save_plots: bool) -> str:
         "urllib3",  # HTTP client library (used by requests)
         "wcwidth",  # Measures width of unicode strings in terminals
         "weakref",  # Weak references to objects
+        "webencodings",  # Encoding library for web applications
         "winreg",  # Windows registry access (Windows-specific)
         "wx",  # Cross-platform GUI toolkit
         "zipimport",  # Import modules from ZIP archives
@@ -321,6 +329,7 @@ PACKAGE_NAME_OVERRIDES = {{
     "png": "pypng",
     "mpl_toolkits.basemap": "basemap",
     "mpl_toolkits": "matplotlib",
+    "socks": "PySocks",
 }}
 
 
@@ -390,6 +399,7 @@ def secure_import(
             "urllib2",  # Not available in Python 3 - use 'urllib' instead
             "scikits",  # Temporarily disable until dockerization
             "sksparse",  # Temporarily disable until dockerization
+            "cchardet",  # Temporarily disable until dockerization
         ]
         if not is_package_installed(package_name) and package_name not in exceptions:
             print(f"Package '{{package_name}}' not found. Attempting to install...")

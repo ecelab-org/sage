@@ -18,6 +18,10 @@ Sage bridges the gap between AI capabilities and system automation. With a simpl
   - Scrape content from websites
   - Extract text, HTML, or links from web pages
   - Process online information for analysis
+- **Code Execution**:
+  - Run Python code in a sandboxed environment
+  - Support for popular data science libraries (numpy, pandas, matplotlib, etc.)
+  - Execute and test code snippets with visual outputs
 - **Smart Configuration**:
   - Environment-based setup
   - Automatic virtual environment management
@@ -106,17 +110,14 @@ Scrapes content from websites, with options to extract text, HTML, or links from
 **Example:** "Scrape the main article content from this URL" or "Extract all links from the navigation menu at example.com"
 
 **Real-world Example:**
-<pre>Activating virtual environment and starting program...
-Using model: claude-3-7-sonnet-latest
-Available embedded tools: ['str_replace_editor']
-Available custom tools: ['read_file', 'list_files', 'edit_file', 'web_scraper']
-Chat with Claude (use 'ctrl-c' to quit)
-
-🧑 <span style="color:blue;"><b>You:</b></span> what is the current price of VTI ETF?
+<pre>🧑 <span style="color:blue;"><b>You:</b></span> what is the current price of VTI ETF?
 
 🤖 <span style="color:yellow;"><b>Claude:</b></span> I'll help you find the current price of the VTI ETF (Vanguard Total Stock Market ETF). Let me retrieve this information from a financial website.
 
 🔧 <span style="color:green;"><b>tool:</b></span> web_scraper({"url": "https://finance.yahoo.com/quote/VTI"})
+
+🔧 <span style="color:green;"><b>tool execution result:</b></span>
+[Page text content - omitted for brevity]
 
 🤖 <span style="color:yellow;"><b>Claude:</b></span> Based on the information I retrieved from Yahoo Finance, the current price of VTI (Vanguard Total Stock Market Index Fund ETF) is:
 
@@ -132,6 +133,35 @@ Additional information about VTI:
 - Yield: 1.36%
 
 This is the Vanguard Total Stock Market ETF that tracks the performance of the entire U.S. stock market, including large-, mid-, small-, and micro-cap stocks.</pre>
+
+### `code_executor`
+Executes Python code in a sandboxed environment and returns the results. Supports common data science libraries like numpy, pandas, matplotlib, and scipy.
+
+**Example:** "Run this Python function to analyze my data" or "Create a visualization of these numbers using matplotlib"
+
+**Real-world Example:**
+<pre>🧑 <span style="color:blue;"><b>You:</b></span> Generate a simple plot of sine and cosine waves
+
+🤖 <span style="color:yellow;"><b>Claude:</b></span> I'll create a simple plot of sine and cosine waves using matplotlib. Let me execute the code for you.
+
+🔧 <span style="color:green;"><b>tool:</b></span> code_executor({"code": "import numpy as np\nimport matplotlib.pyplot as plt\n\n# Generate data points\nx = np.linspace(0, 2*np.pi, 100)\ny_sin = np.sin(x)\ny_cos = np.cos(x)\n\n# Create the plot\nplt.figure(figsize=(10, 6))\nplt.plot(x, y_sin, label='sin(x)', color='blue')\nplt.plot(x, y_cos, label='cos(x)', color='red')\n\n# Add labels and title\nplt.xlabel('x')\nplt.ylabel('y')\nplt.title('Sine and Cosine Functions')\nplt.legend()\nplt.grid(True)\n\n# Display the plot\nplt.tight_layout()"})
+
+🔧 <span style="color:green;"><b>tool execution result:</b></span>
+Matplotlib initialized successfully in non-interactive mode.
+
+Plots saved to files: plot_0.png
+
+🤖 <span style="color:yellow;"><b>Claude:</b></span> I've created a simple plot showing sine and cosine waves. The plot displays one complete cycle of both functions from 0 to 2π.
+
+The graph shows:
+- The sine wave (in blue) which starts at 0, rises to 1, falls to -1, and returns to 0
+- The cosine wave (in red) which starts at 1, falls to -1, and rises back to 1
+
+The plot includes proper labeling (x and y axes), a title, a legend identifying each function, and a grid for easier reading.
+
+The plot has been saved as "plot_0.png" in your current directory. You can view it or use it in any documentation you're creating.
+
+Is there anything specific about these trigonometric functions you'd like me to explain, or would you like me to modify the plot in any way?</pre>
 
 ### Embedded Tools
 Sage also leverages Claude's built-in capabilities with embedded tools:
@@ -163,16 +193,21 @@ This demonstrates how Sage can create complex, well-designed files from simple n
 ## 📁 Project Structure
 ```
 sage/
-├── main.py                   # Main application code with agent implementation
 ├── tools/                    # Tool implementations
+│   ├── __init__.py           # Package initializer for tools module
+│   ├── code_executor.py      # Python code execution in sandbox
 │   └── web_scraper.py        # Web scraping functionality
-├── runme.sh                  # Setup and run script
-├── runme_documentation.html  # AI-generated interactive documentation
-├── requirements.txt          # Python dependencies
-├── requirements_dev.txt      # Development dependencies
-├── .gitignore                # Git ignore configuration
 ├── workarea/                 # Directory for generated files and workspace
-└── .env                      # Environment variables (not checked into git)
+├── .env                      # Environment variables (not checked into git)
+├── .gitignore                # Git ignore configuration
+├── common.py                 # Common utility functions (colored text output)
+├── LICENSE                   # MIT license file
+├── main.py                   # Main application code with agent implementation
+├── README.md                 # Project documentation (this file)
+├── requirements_dev.txt      # Development dependencies
+├── requirements.txt          # Python dependencies
+├── runme_documentation.html  # AI-generated interactive documentation
+└── runme.sh                  # Setup and run script
 ```
 
 ## 💻 Development

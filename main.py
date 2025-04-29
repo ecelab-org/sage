@@ -277,7 +277,7 @@ class Agent:
                 content_type = content.get("type")
                 if content_type == "text":
                     # Display text responses from the AI
-                    print_yellow(f"\U0001f916 Claude: {content.get('text', '')}")
+                    print_yellow(f"\n\U0001f916 Claude: {content.get('text', '')}")
                 elif content_type == "tool_use":
                     # Execute tools requested by the AI
                     result = self.execute_tool(
@@ -323,7 +323,7 @@ class Agent:
             }
 
         # Log tool execution
-        print_green("\U0001f527 tool: ", end="")
+        print_green("\n\U0001f527 tool: ", end="")
         print(
             name
             + f"({decode_escaped_strings(json.dumps(input_data, indent=2, ensure_ascii=False))})"
@@ -332,12 +332,12 @@ class Agent:
         # Execute the tool function
         response, err = tool_def.function(input_data)
         # Log tool execution result
-        print_green("\U0001f527 tool execution result:")
+        print_green("\n\U0001f527 tool execution result:")
         print(f"{response}")
         if err:
             error_msg = str(err)
             # Log tool execution error
-            print_red("\U0001f527 tool execution error message: ", end="")
+            print_red("\n\U0001f527 tool execution error message: ", end="")
             print(f"{error_msg}")
             return {
                 "type": "tool_result",

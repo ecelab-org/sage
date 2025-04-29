@@ -94,8 +94,7 @@ Sage comes with several built-in tools to interact with your file system:
 
 ### `read_file`
 Reads the contents of a file at a specified path.
-
-**Example:** "Show me what's in requirements.txt"
+**Example:** "Read myapp.py and explain how the authentication system works"
 
 ### `list_files`
 Lists all files and directories at a given path.
@@ -105,12 +104,12 @@ Lists all files and directories at a given path.
 ### `edit_file`
 Makes changes to text files by replacing specified content. Can also create new files.
 
-**Example:** "Create a new file called app.py with a Flask hello world app" or "In main.py, replace the print statement with a logging statement"
+**Example:** "Create a new file called app.py with a Flask hello world app" or "Add or enhance docstrings and inline comments throughout main.py to improve code clarity and documentation quality"
 
 ### `web_scraper`
 Scrapes content from websites, with options to extract text, HTML, or links from specific page elements.
 
-**Example:** "Scrape the main article content from this URL" or "Extract all links from the navigation menu at example.com"
+**Example:** "List all keynote speakers from the next conference agenda at sxsw.com" or "Extract all image URLs from the gallery section of nasa.gov"
 
 **Real-world Example:**
 <pre>🧑 <span style="color:blue;"><b>You:</b></span> What is the current price of VTI ETF?

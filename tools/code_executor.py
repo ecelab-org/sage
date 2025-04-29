@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 from typing import (
     Any,
     Dict,
@@ -53,6 +54,9 @@ def execute_code(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
             module_name = os.path.basename(script_file.name).removesuffix(".py")
 
             try:
+                # Get timestamp before execution
+                start_time = time.time()
+
                 # Execute the code with timeout
                 result = subprocess.run(
                     [
@@ -82,7 +86,12 @@ def execute_code(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
                 # Check for saved plots if requested
                 if save_plots:
                     plot_files = [
-                        f for f in os.listdir(".") if f.startswith("plot_") and f.endswith(".png")
+                        f
+                        for f in os.listdir(".")
+                        if f.startswith("plot_")
+                        and f.endswith(".png")
+                        and os.path.exists(f)
+                        and os.path.getmtime(f) >= start_time
                     ]
                     if plot_files:
                         output += f"\n\n{len(plot_files)} plot(s) were generated."
@@ -570,5 +579,8 @@ if __name__ == "__main__":
     # Indent the user code for the try block
     indented_code = "\n".join(f"        {line}" for line in code.splitlines())
 
+    # save the script to a file
+    with open("sandbox_script_copy.py", "w", encoding="utf-8") as f:
+        f.write(sandbox_header + sandbox_body.format(user_code=indented_code) + sandbox_footer)
     # Combine all parts and return the final script
     return sandbox_header + sandbox_body.format(user_code=indented_code) + sandbox_footer

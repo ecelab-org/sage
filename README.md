@@ -72,16 +72,19 @@ The script automatically:
 
 2. Chat with Sage using natural language. Examples:
    ```
-   List all Python files in the src directory
-   ```
-   ```
-   Create a new file called hello.py that prints "Hello, World!" and accepts a name parameter
-   ```
-   ```
    Guide me through the contents of main.py and explain what it does
    ```
    ```
    Find and fix syntax errors in app.js
+   ```
+   ```
+   Scrape today's top headlines from The New York Times and summarize them
+   ```
+   ```
+   Create a visualization of my data in sales.csv showing monthly revenue trends
+   ```
+   ```
+   Generate a REST API server using Express.js with endpoints for user authentication
    ```
 
 3. Press `Ctrl+C` to exit the application.
@@ -137,7 +140,7 @@ This is the Vanguard Total Stock Market ETF that tracks the performance of the e
 ### `code_executor`
 Executes Python code in a sandboxed environment and returns the results. Supports common data science libraries like numpy, pandas, matplotlib, and scipy.
 
-**Example:** "Make a histogram from my data in myfile.csv" or "Plot the locations of the world's 20 most populated cities on a map with population indicators"
+**Example:** "Make a histogram from my data in myfile.csv" or "Create a simple machine learning model using scikit-learn that can classify iris flowers, and visualize the decision boundaries"
 
 **Real-world Example 1:**
 <pre>🧑 <span style="color:blue;"><b>You:</b></span> Generate a simple plot of sine and cosine waves

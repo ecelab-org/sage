@@ -11,6 +11,9 @@ additional capabilities by registering new tool functions.
 
 import json
 import os
+
+# Import readline for improved user input experience
+import readline  # pylint: disable=unused-import
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (

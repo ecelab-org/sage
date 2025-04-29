@@ -364,9 +364,8 @@ def your_tool_name(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]
 - **Permission Denied**: Make sure `runme.sh` is executable (`chmod +x runme.sh`)
 
 ## 🚧 Roadmap
+- Session persistence
 - Web UI interface
-- Support for more complex file operations
-- Integration with version control systems
 - Expanded tool catalog
 
 ## 📄 License

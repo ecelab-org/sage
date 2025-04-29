@@ -128,6 +128,7 @@ def _create_sandbox_script(code: str, save_plots: bool) -> str:
         "colorama",  # Cross-platform colored terminal text
         "comm",  # Jupyter kernel communication protocol
         "contextily",  # Contextual basemaps for web mapping
+        "contourpy",  # Contour plotting library
         "cPickle",  # C implementation of pickle (faster but legacy Python 2)
         "ctags",  # Source code indexing and tag generation
         "cycler",  # Composable style cycles for matplotlib
@@ -153,11 +154,13 @@ def _create_sandbox_script(code: str, save_plots: bool) -> str:
         "ipywidgets",  # Interactive widgets for Jupyter notebooks
         "jedi",  # Autocompletion and static analysis for Python
         "jinja2",  # Template engine for Python
+        "joblib",  # Joblib for lightweight pipelining
         "json",  # JSON encoder and decoder
         "kiwisolver",  # Fast implementation of the Cassowary constraint solver
         "Levenshtein",  # String similarity and edit distance metrics
         "logging",  # Python's built-in logging facility
         "lxml",  # XML and HTML processing library
+        "lz4",  # Fast compression library
         "markupsafe",  # String handling for HTML/XML, escapes unsafe characters
         "matplotlib",  # Comprehensive visualization library
         "mimetypes",  # Mapping of filenames to MIME types
@@ -181,6 +184,7 @@ def _create_sandbox_script(code: str, save_plots: bool) -> str:
         "png",  # Portable Network Graphics format
         "posixpath",  # POSIX-style pathname manipulation
         "prompt_toolkit",  # Library for interactive command lines
+        "psutil",  # Process and system utilities
         "pure_eval",  # Safely evaluate Python expressions
         "pyarrow",  # Python bindings for Apache Arrow (columnar memory format)
         "pydantic",  # Data validation using Python type hints
@@ -216,6 +220,7 @@ def _create_sandbox_script(code: str, save_plots: bool) -> str:
         "sympy",  # Symbolic mathematics
         "tabulate",  # Pretty-print tabular data
         "textwrap",  # Text wrapping and filling
+        "threadpoolctl",  # Threadpool control library
         "tkinter",  # Standard GUI toolkit for Python
         "tqdm",  # Progress bar for loops and iterations
         "traitlets",  # Configuration system for applications
@@ -330,6 +335,7 @@ PACKAGE_NAME_OVERRIDES = {{
     "mpl_toolkits.basemap": "basemap",
     "mpl_toolkits": "matplotlib",
     "socks": "PySocks",
+    "sklearn": "scikit-learn",
 }}
 
 

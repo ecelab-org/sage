@@ -9,7 +9,7 @@ Sage bridges the gap between AI capabilities and system automation. With a simpl
 
 ## ✨ Features
 - **Interactive Web Interface**: Access Sage through a browser-based UI with real-time responses
-- **Interactive CLI Chat Interface**: Communicate with Anthropic Claude models conversationally
+- **Interactive CLI Chat Interface**: Communicate with Sage conversationally
 - **File System Operations**:
   - Read file contents (code, text, configuration files)
   - List and navigate directories
@@ -122,14 +122,14 @@ Scrapes content from websites, with options to extract text, HTML, or links from
 **Real-world Example:**
 <pre>🧑 <span style="color:blue;"><b>You:</b></span> What is the current price of VTI ETF?
 
-🤖 <span style="color:yellow;"><b>Claude:</b></span> I'll help you find the current price of the VTI ETF (Vanguard Total Stock Market ETF). Let me retrieve this information from a financial website.
+🤖 <span style="color:yellow;"><b>Sage:</b></span> I'll help you find the current price of the VTI ETF (Vanguard Total Stock Market ETF). Let me retrieve this information from a financial website.
 
 🔧 <span style="color:green;"><b>tool:</b></span> web_scraper({"url": "https://finance.yahoo.com/quote/VTI"})
 
 🔧 <span style="color:green;"><b>tool execution result:</b></span>
 [Page text content - omitted for brevity]
 
-🤖 <span style="color:yellow;"><b>Claude:</b></span> Based on the information I retrieved from Yahoo Finance, the current price of VTI (Vanguard Total Stock Market Index Fund ETF) is:
+🤖 <span style="color:yellow;"><b>Sage:</b></span> Based on the information I retrieved from Yahoo Finance, the current price of VTI (Vanguard Total Stock Market Index Fund ETF) is:
 
 - Current price: $264.39 (after hours price as of April 23)
 - Regular market close price: $263.44 (+$4.41, +1.70%)
@@ -152,7 +152,7 @@ Executes Python code in a sandboxed environment and returns the results. Support
 **Real-world Example 1:**
 <pre>🧑 <span style="color:blue;"><b>You:</b></span> Generate a simple plot of sine and cosine waves
 
-🤖 <span style="color:yellow;"><b>Claude:</b></span> I'll create a simple plot of sine and cosine waves using matplotlib. Let me execute the code for you.
+🤖 <span style="color:yellow;"><b>Sage:</b></span> I'll create a simple plot of sine and cosine waves using matplotlib. Let me execute the code for you.
 
 🔧 <span style="color:green;"><b>tool:</b></span> code_executor({
   "code": "import numpy as np
@@ -186,7 +186,7 @@ Plots saved to files: plot_0.png
 
 1 plot(s) were generated.
 
-🤖 <span style="color:yellow;"><b>Claude:</b></span> I've created a simple plot showing sine and cosine waves. The plot displays one complete cycle of both functions from 0 to 2π.
+🤖 <span style="color:yellow;"><b>Sage:</b></span> I've created a simple plot showing sine and cosine waves. The plot displays one complete cycle of both functions from 0 to 2π.
 
 The graph shows:
 - The sine wave (in blue) which starts at 0, rises to 1, falls to -1, and returns to 0
@@ -201,7 +201,7 @@ Is there anything specific about these trigonometric functions you'd like me to 
 **Real-world Example 2:**
 <pre>🧑 <span style="color:blue;"><b>You:</b></span> Plot the locations of the world's 20 most populated cities on a map with population indicators
 
-🤖 <span style="color:yellow;"><b>Claude:</b></span> I'll create a world map showing the 20 most populated cities with indicators for their populations. Let me write and execute the code for this visualization.
+🤖 <span style="color:yellow;"><b>Sage:</b></span> I'll create a world map showing the 20 most populated cities with indicators for their populations. Let me write and execute the code for this visualization.
 
 🔧 <span style="color:green;"><b>tool:</b></span> code_executor({
   "code": [Omitted for brevity]
@@ -214,7 +214,7 @@ Plots saved to files: world_most_populated_cities.png
 
 1 plot(s) were generated.
 
-🤖 <span style="color:yellow;"><b>Claude:</b></span> The map has been successfully created. Let me explain what the visualization shows:
+🤖 <span style="color:yellow;"><b>Sage:</b></span> The map has been successfully created. Let me explain what the visualization shows:
 
 ### World's 20 Most Populated Cities Map Visualization
 
@@ -346,13 +346,13 @@ You can extend Sage with new tools by following the pattern in `main.py`:
 2. Use the `@register_tool` decorator to define the tool's name, description, and input schema
 3. Return results as a tuple of (result_string, optional_exception)
 
-> **Pro tip:** The quality and clarity of your tool's description directly affects how effectively Claude can understand when and how to use it. More detailed descriptions lead to better tool utilization.
+> **Pro tip:** The quality and clarity of your tool's description directly affects how effectively Sage can understand when and how to use it. More detailed descriptions lead to better tool utilization.
 
 **Example Tool Implementation:**
 ```python
 @register_tool(
     name="your_tool_name",
-    description="Detailed description of what this tool does, when to use it, and any important considerations. The more specific and clear this description is, the better Claude will understand when and how to use this tool for appropriate tasks. Include examples of typical use cases if possible.",
+    description="Detailed description of what this tool does, when to use it, and any important considerations. The more specific and clear this description is, the better Sage will understand when and how to use this tool for appropriate tasks. Include examples of typical use cases if possible.",
     input_schema={
         "properties": {
             "param1": {

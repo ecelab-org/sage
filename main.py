@@ -252,7 +252,7 @@ class Agent:
         """
         conversation = []  # Stores the entire conversation history
 
-        print("Chat with Claude (use 'ctrl-c' to quit)")
+        print("Chat with Sage (use 'ctrl-c' to quit)")
 
         read_user_input = True
         while True:
@@ -280,7 +280,7 @@ class Agent:
                 content_type = content.get("type")
                 if content_type == "text":
                     # Display text responses from the AI
-                    print_yellow(f"\n\U0001f916 Claude: {content.get('text', '')}")
+                    print_yellow(f"\n\U0001f916 Sage: {content.get('text', '')}")
                 elif content_type == "tool_use":
                     # Execute tools requested by the AI
                     result = self.execute_tool(
@@ -520,13 +520,13 @@ def _edit_file(file_path: Path, old_str: str, new_str: str) -> Tuple[str, Option
     },
     is_embedded=True,
     embedded_type="text_editor_20250124",
-    # This is the type that Claude uses to identify the tool
+    # This is the type that Sage uses to identify the tool
     compatible_models=["claude-3-5-sonnet", "claude-3-7-sonnet"],
     # List of models that can use this tool
 )
 def str_replace_editor(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]]:
     """
-    Handle Claude's built-in text editor commands: view, create, str_replace.
+    Handle Sage's built-in text editor commands: view, create, str_replace.
     """
     command = input_data.get("command")
     path = input_data.get("path", "")

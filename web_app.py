@@ -147,7 +147,7 @@ def create_index_html(path: Path) -> bool:
             background-color: #f8f9fa;
         }
         .chat-container {
-            height: calc(100vh - 180px);
+            height: calc(100vh - 205px); /* Slightly reduced height to allow for bottom padding */
             overflow-y: auto;
             padding: 20px;
             background-color: white;
@@ -169,6 +169,7 @@ def create_index_html(path: Path) -> bool:
             border-radius: 15px;
             margin-bottom: 10px;
             max-width: 80%;
+            white-space: pre-wrap; /* Preserve newlines */
         }
         .tool-message {
             background-color: #e8eaf6;
@@ -201,9 +202,7 @@ def create_index_html(path: Path) -> bool:
         <div class="row">
             <div class="col-md-12">
                 <div class="chat-container" id="chat-container">
-                    <div class="assistant-message">
-                        Hello! I'm Sage, your AI assistant. How can I help you today?
-                    </div>
+                    <div class="assistant-message">Hello! I'm Sage, your AI assistant. How can I help you today?</div>
                 </div>
                 <div class="input-group">
                     <input type="text" class="form-control" placeholder="Type your message here..." id="user-input">

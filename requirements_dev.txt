@@ -4,3 +4,4 @@ black
 
 # Type checking and linting of varrious packages
 types-requests
+types-Flask-SocketIO

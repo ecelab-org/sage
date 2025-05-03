@@ -5,6 +5,7 @@ set -e
 
 # Default settings
 CLEANUP_FILES=false
+MODE="web"  # Default to Web UI mode
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -13,9 +14,29 @@ while [[ $# -gt 0 ]]; do
       CLEANUP_FILES=true
       shift
       ;;
+    --mode)
+      if [[ $2 == "web" || $2 == "cli" ]]; then
+        MODE=$2
+        shift 2
+      else
+        echo "Error: --mode requires either 'web' or 'cli' as argument"
+        exit 1
+      fi
+      ;;
+    --cli)
+      MODE="cli"
+      shift
+      ;;
+    --web)
+      MODE="web"
+      shift
+      ;;
     --help)
       echo "Usage: $0 [OPTIONS]"
       echo "Options:"
+      echo "  --mode web|cli  Set mode to Web UI or CLI (default: web)"
+      echo "  --web           Run in Web UI mode (web interface)"
+      echo "  --cli           Run in CLI mode (command line)"
       echo "  --clean-files   Delete files older than 7 days in workarea"
       echo "  --help          Show this help message"
       exit 0
@@ -115,9 +136,14 @@ echo "Changing to workarea directory: $WORKAREA_DIR"
 mkdir -p "$WORKAREA_DIR"  # Ensure it exists
 cd "$WORKAREA_DIR"
 
-# Run the main program from the workarea directory
-echo "Running main program from workarea directory..."
-python "$SCRIPT_DIR/main.py"
+# Run the program in the selected mode
+if [ "$MODE" = "web" ]; then
+    echo "Starting Sage in Web UI mode (web interface)..."
+    python "$SCRIPT_DIR/web_app.py"
+else
+    echo "Starting Sage in CLI mode (command line)..."
+    python "$SCRIPT_DIR/main.py"
+fi
 
 # Return to original directory
 echo "Returning to original directory..."

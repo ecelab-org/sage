@@ -325,6 +325,7 @@ set -e
 
 # Default settings
 CLEANUP_FILES=false
+MODE="web"  # Default to Web UI mode
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -333,10 +334,30 @@ while [[ $# -gt 0 ]]; do
       CLEANUP_FILES=true
       shift
       ;;
+    --mode)
+      if [[ $2 == "web" || $2 == "cli" ]]; then
+        MODE=$2
+        shift 2
+      else
+        echo "Error: --mode requires either 'web' or 'cli' as argument"
+        exit 1
+      fi
+      ;;
+    --cli)
+      MODE="cli"
+      shift
+      ;;
+    --web)
+      MODE="web"
+      shift
+      ;;
     --help)
       echo "Usage: $0 [OPTIONS]"
       echo "Options:"
-      echo "  --keep-files    Don't delete old files in workarea"
+      echo "  --mode web|cli  Set mode to Web UI or CLI (default: web)"
+      echo "  --web           Run in Web UI mode (web interface)"
+      echo "  --cli           Run in CLI mode (command line)"
+      echo "  --clean-files   Delete files older than 7 days in workarea"
       echo "  --help          Show this help message"
       exit 0
       ;;
@@ -435,9 +456,14 @@ echo "Changing to workarea directory: $WORKAREA_DIR"
 mkdir -p "$WORKAREA_DIR"  # Ensure it exists
 cd "$WORKAREA_DIR"
 
-# Run the main program from the workarea directory
-echo "Running main program from workarea directory..."
-python "$SCRIPT_DIR/main.py"
+# Run the program in the selected mode
+if [ "$MODE" = "web" ]; then
+    echo "Starting Sage in Web UI mode (web interface)..."
+    python "$SCRIPT_DIR/web_app.py"
+else
+    echo "Starting Sage in CLI mode (command line)..."
+    python "$SCRIPT_DIR/main.py"
+fi
 
 # Return to original directory
 echo "Returning to original directory..."
@@ -483,6 +509,7 @@ REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"</code></pre>
                 <div class="code-container">
                     <pre><code class="language-bash"># Default settings
 CLEANUP_FILES=false
+MODE="web"  # Default to Web UI mode
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -491,9 +518,29 @@ while [[ $# -gt 0 ]]; do
       CLEANUP_FILES=true
       shift
       ;;
+    --mode)
+      if [[ $2 == "web" || $2 == "cli" ]]; then
+        MODE=$2
+        shift 2
+      else
+        echo "Error: --mode requires either 'web' or 'cli' as argument"
+        exit 1
+      fi
+      ;;
+    --cli)
+      MODE="cli"
+      shift
+      ;;
+    --web)
+      MODE="web"
+      shift
+      ;;
     --help)
       echo "Usage: $0 [OPTIONS]"
       echo "Options:"
+      echo "  --mode web|cli  Set mode to Web UI or CLI (default: web)"
+      echo "  --web           Run in Web UI mode (web interface)"
+      echo "  --cli           Run in CLI mode (command line)"
       echo "  --clean-files   Delete files older than 7 days in workarea"
       echo "  --help          Show this help message"
       exit 0
@@ -508,12 +555,15 @@ done</code></pre>
                 </div>
                 <p>This section handles command line arguments to customize script behavior:</p>
                 <ul>
+                    <li><strong>--mode web|cli</strong> - Explicitly set the application mode to either Web UI (web interface) or CLI (command line)</li>
+                    <li><strong>--web</strong> - Shorthand option to run in Web UI mode (web interface)</li>
+                    <li><strong>--cli</strong> - Shorthand option to run in CLI mode (command line)</li>
                     <li><strong>--clean-files</strong> - When provided, the script will clean up files older than 7 days in the workarea directory</li>
                     <li><strong>--help</strong> - Displays usage information and available options</li>
                 </ul>
                 <p>The script uses a while loop with a case statement to parse each argument provided to the script. This is a common pattern for handling command-line arguments in bash scripts.</p>
                 <div class="note">
-                    <p>By default, the script does not clean up old files. You need to explicitly pass the <code>--clean-files</code> flag if you want this behavior.</p>
+                    <p>By default, the script runs in Web UI mode with the web interface. You need to explicitly pass the <code>--cli</code> flag if you want to use the command line interface instead.</p>
                 </div>
             </div>
 
@@ -736,9 +786,14 @@ echo "Changing to workarea directory: $WORKAREA_DIR"
 mkdir -p "$WORKAREA_DIR"  # Ensure it exists
 cd "$WORKAREA_DIR"
 
-# Run the main program from the workarea directory
-echo "Running main program from workarea directory..."
-python "$SCRIPT_DIR/main.py"
+# Run the program in the selected mode
+if [ "$MODE" = "web" ]; then
+    echo "Starting Sage in Web UI mode (web interface)..."
+    python "$SCRIPT_DIR/web_app.py"
+else
+    echo "Starting Sage in CLI mode (command line)..."
+    python "$SCRIPT_DIR/main.py"
+fi
 
 # Return to original directory
 echo "Returning to original directory..."
@@ -754,12 +809,17 @@ deactivate</code></pre>
                     <li>Makes the workarea path available to the Python program as an environment variable</li>
                     <li>Saves the current directory location</li>
                     <li>Changes to the workarea directory</li>
-                    <li>Executes the main Python program (main.py) from within the workarea</li>
+                    <li>Checks the selected mode:
+                        <ul>
+                            <li>If in Web UI mode (default), runs the web interface via <code>web_app.py</code></li>
+                            <li>If in CLI mode, runs the command line interface via <code>main.py</code></li>
+                        </ul>
+                    </li>
                     <li>Returns to the original directory</li>
                     <li>Deactivates the virtual environment</li>
                 </ol>
                 <div class="warning">
-                    <p>The script assumes there's a <code>main.py</code> file in the same directory as the script. If this file is missing or named differently, the script will fail at this point.</p>
+                    <p>The script assumes there are both <code>main.py</code> and <code>web_app.py</code> files in the same directory as the script. If either file is missing or named differently, the script will fail when trying to run that mode.</p>
                 </div>
             </div>
         </section>
@@ -943,12 +1003,19 @@ deactivate</code></pre>
                 </li>
                 <li>Optional: Use command line arguments to customize behavior:
                     <div class="code-container">
-                        <pre><code class="language-bash">./runme.sh --clean-files</code></pre>
+                        <pre><code class="language-bash"># Run with web interface (default)
+./runme.sh --web
+
+# Run with command line interface
+./runme.sh --cli
+
+# Run with web interface and clean old files
+./runme.sh --clean-files</code></pre>
                     </div>
                 </li>
             </ol>
             <div class="note">
-                <p>The script will create a requirements.txt file if one doesn't exist, set up a virtual environment, install all required packages, and then run the main.py script.</p>
+                <p>The script will create a requirements.txt file if one doesn't exist, set up a virtual environment, install all required packages, and then run either the web interface or command line interface based on the specified mode.</p>
             </div>
             <div class="warning">
                 <p>Make sure you have Python 3.11 installed on your system, as that's the specific version the script is set to use.</p>

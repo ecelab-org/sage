@@ -8,7 +8,8 @@ An interactive AI assistant powered by Anthropic's Claude that performs various 
 Sage bridges the gap between AI capabilities and system automation. With a simple chat interface, you can ask Sage to read and modify files, scrape web content, gather information, generate code, and perform a variety of tasks—all using natural language instructions.
 
 ## ✨ Features
-- **Interactive Chat Interface**: Communicate with Anthropic Claude models conversationally
+- **Interactive Web Interface**: Access Sage through a browser-based UI with real-time responses
+- **Interactive CLI Chat Interface**: Communicate with Anthropic Claude models conversationally
 - **File System Operations**:
   - Read file contents (code, text, configuration files)
   - List and navigate directories
@@ -53,24 +54,31 @@ Sage bridges the gap between AI capabilities and system automation. With a simpl
 
 3. Run the provided setup and start script:
    ```bash
-   ./runme.sh
+   ./runme.sh         # Starts with web interface (default)
+   ./runme.sh --cli   # Starts with command line interface
    ```
 
 The script automatically:
 - Creates a virtual environment if one doesn't exist
 - Installs all required dependencies from requirements.txt
 - Sets up a workarea directory for generated files
-- Runs the application
+- Runs the application in the selected interface mode
 
 ## 🚀 Usage
 1. Start Sage with optional flags:
    ```bash
-   ./runme.sh                # Run with default settings
+   ./runme.sh                # Run with web interface (default)
+   ./runme.sh --cli          # Run with command line interface
    ./runme.sh --clean-files  # Run and delete old files
+   ./runme.sh --mode ui|cli  # Explicitly set interface mode
    ./runme.sh --help         # View all command options
    ```
 
-2. Chat with Sage using natural language. Examples:
+2. Interact with Sage:
+   - **Web Interface**: Navigate to http://localhost:5000 in your browser
+   - **CLI**: Chat directly in your terminal
+
+3. Chat with Sage using natural language. Examples:
    ```
    Guide me through the contents of main.py and explain what it does
    ```
@@ -291,11 +299,12 @@ sage/
 ├── .gitignore                           # Git ignore configuration
 ├── common.py                            # Common utility functions (colored text output)
 ├── LICENSE                              # MIT license file
-├── main.py                              # Main application code with agent implementation
+├── main.py                              # Main CLI application code
 ├── README.md                            # Project documentation (this file)
 ├── requirements_dev.txt                 # Development dependencies
 ├── requirements.txt                     # Python dependencies
-└── runme.sh                             # Setup and run script
+├── runme.sh                             # Setup and run script
+└── web_app.py                           # Web interface using Flask and WebSockets
 ```
 
 ## 💻 Development
@@ -365,7 +374,6 @@ def your_tool_name(input_data: Dict[str, Any]) -> Tuple[str, Optional[Exception]
 
 ## 🚧 Roadmap
 - Session persistence
-- Web UI interface
 - Expanded tool catalog
 
 ## 📄 License

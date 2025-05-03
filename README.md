@@ -284,6 +284,17 @@ open examples/world_most_populated_cities.png      # macOS
 
 These examples demonstrate how Sage can create complex, well-designed files from simple natural language requests.
 
+### Web Interface Demo
+Sage provides an intuitive browser-based interface that makes interaction simple and accessible. The Web UI features a chat-like interface similar to popular AI assistants but with the added power of specialized tools for file operations, web scraping, code execution, and more.
+
+[![Sage Web Interface](examples/web_ui_demo.png)](examples/web_ui_demo.png)
+
+Key features of the Web UI include:
+- Responsive design that works on both desktop and mobile devices
+- Message history with distinct styling for user and assistant messages
+- Tool execution results displayed inline with proper formatting
+- Real-time typing indicators and model information
+
 ## 📁 Project Structure
 ```
 sage/
